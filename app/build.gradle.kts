@@ -17,10 +17,10 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        // Backend local: 10.0.2.2 es el alias del emulador Android hacia el localhost del host.
-        // Para probar en un dispositivo físico, cambia este valor por la IP LAN de tu PC
-        // (ambos deben estar en la misma red Wi-Fi), ej: "http://192.168.1.50:5166/"
-        buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:5166/\"")
+        // Backend local. 10.0.2.2 es el alias del emulador Android hacia el localhost del host;
+        // para un dispositivo físico usa la IP LAN de tu PC (ambos en la misma red Wi-Fi) — hoy
+        // es 10.11.128.15, pero cambia si tu PC se reconecta o cambias de red (revisa `ipconfig`).
+        buildConfigField("String", "API_BASE_URL", "\"http://10.11.128.15:5166/\"")
     }
 
     buildTypes {
