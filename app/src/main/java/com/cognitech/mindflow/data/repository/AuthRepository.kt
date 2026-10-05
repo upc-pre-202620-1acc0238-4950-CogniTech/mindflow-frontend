@@ -2,16 +2,26 @@ package com.cognitech.mindflow.data.repository
 
 import android.content.ContentValues
 import android.database.Cursor
-import android.database.sqlite.SQLiteConstraintException
+import android.database.sqlite.SQLiteDatabase
 import com.cognitech.mindflow.data.local.MindFlowDatabase
 import com.cognitech.mindflow.data.local.MindFlowDatabase.Companion.TABLE_USERS
 import com.cognitech.mindflow.data.local.SessionManager
 import com.cognitech.mindflow.data.model.User
+import com.cognitech.mindflow.data.remote.ApiClient
+import com.cognitech.mindflow.data.remote.dto.SignInRequest
+import com.cognitech.mindflow.data.remote.dto.SignUpRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.security.MessageDigest
 import java.security.SecureRandom
 
+/**
+ * El inicio de sesión / registro ahora vive en el backend (IAM) — es la fuente de verdad de
+ * identidad y la que emite el JWT. La tabla local `users` queda como caché offline del perfil
+ * (lo que permite a Journal/Habits, que siguen siendo 100% locales por ahora, seguir operando
+ * sin red). Sincronizar Journal/Habits con el backend queda pendiente para un paso posterior.
+ */
 class AuthRepository(
     private val database: MindFlowDatabase,
     val session: SessionManager,
@@ -20,33 +30,57 @@ class AuthRepository(
 
     suspend fun signUp(name: String, email: String, password: String): Result<User> =
         withContext(Dispatchers.IO) {
-            val values = ContentValues().apply {
-                put("name", name.trim())
-                put("email", email.trim().lowercase())
-                put("password_hash", hashPassword(password))
-                put("created_at", System.currentTimeMillis())
-            }
             try {
-                val id = database.writableDatabase.insertOrThrow(TABLE_USERS, null, values)
-                habitRepository.seedDefaults(id)
-                session.login(id)
-                Result.success(findById(id)!!)
-            } catch (e: SQLiteConstraintException) {
-                Result.failure(AuthException("Ya existe una cuenta con ese correo"))
+                val trimmedEmail = email.trim().lowercase()
+                val signUpResponse = ApiClient.authApi.signUp(
+                    SignUpRequest(trimmedEmail, password, name.trim())
+                )
+                if (!signUpResponse.isSuccessful) {
+                    return@withContext Result.failure(
+                        AuthException(ApiClient.errorMessage(signUpResponse) ?: "No se pudo crear la cuenta")
+                    )
+                }
+
+                // El backend no emite un JWT en /sign-up; se inicia sesión justo después para obtenerlo.
+                val signInResponse = ApiClient.authApi.signIn(SignInRequest(trimmedEmail, password))
+                val auth = signInResponse.body()
+                if (!signInResponse.isSuccessful || auth == null) {
+                    return@withContext Result.failure(
+                        AuthException("Cuenta creada, pero no se pudo iniciar sesión automáticamente.")
+                    )
+                }
+
+                val userId = auth.id.toLong()
+                cacheUser(userId, auth.email, password, name.trim())
+                habitRepository.seedDefaults(userId)
+                session.login(userId, auth.token)
+                Result.success(findById(userId)!!)
+            } catch (e: IOException) {
+                Result.failure(AuthException("No se pudo conectar con el servidor. Verifica tu conexión."))
             }
         }
 
     suspend fun signIn(email: String, password: String): Result<User> =
         withContext(Dispatchers.IO) {
-            val cursor = database.readableDatabase.query(
-                TABLE_USERS, arrayOf("id", "password_hash"), "email = ?",
-                arrayOf(email.trim().lowercase()), null, null, null,
-            )
-            val id = cursor.use {
-                if (!it.moveToFirst() || !verifyPassword(password, it.getString(1))) null else it.getLong(0)
-            } ?: return@withContext Result.failure(AuthException("Correo o contraseña incorrectos"))
-            session.login(id)
-            Result.success(findById(id)!!)
+            try {
+                val trimmedEmail = email.trim().lowercase()
+                val response = ApiClient.authApi.signIn(SignInRequest(trimmedEmail, password))
+                val auth = response.body()
+                if (!response.isSuccessful || auth == null) {
+                    return@withContext Result.failure(
+                        AuthException(ApiClient.errorMessage(response) ?: "Correo o contraseña incorrectos")
+                    )
+                }
+
+                val userId = auth.id.toLong()
+                val isNewLocalAccount = findById(userId) == null
+                cacheUser(userId, auth.email, password)
+                if (isNewLocalAccount) habitRepository.seedDefaults(userId)
+                session.login(userId, auth.token)
+                Result.success(findById(userId)!!)
+            } catch (e: IOException) {
+                Result.failure(AuthException("No se pudo conectar con el servidor. Verifica tu conexión."))
+            }
         }
 
     suspend fun currentUser(): User? = withContext(Dispatchers.IO) {
@@ -69,6 +103,7 @@ class AuthRepository(
     }
 
     suspend fun deleteAccount(userId: Long) = withContext(Dispatchers.IO) {
+        // TODO: por ahora solo borra el caché local; falta el DELETE /api/v1/users contra el backend.
         database.writableDatabase.delete(TABLE_USERS, "id = ?", arrayOf(userId.toString()))
         session.logout()
     }
@@ -76,6 +111,22 @@ class AuthRepository(
     fun isLoggedIn(): Boolean = session.currentUserId != null
 
     fun logout() = session.logout()
+
+    /** Upsert del perfil remoto en el caché local (tabla `users`), preservando campos solo-locales existentes. */
+    private fun cacheUser(id: Long, email: String, password: String, name: String? = null) {
+        val existing = findById(id)
+        val values = ContentValues().apply {
+            put("id", id)
+            put("email", email)
+            put("name", name ?: existing?.name ?: email.substringBefore("@"))
+            put("password_hash", hashPassword(password))
+            put("occupation", existing?.occupation ?: "")
+            put("timezone", existing?.timezone ?: "GMT-5 (Lima, Perú)")
+            put("plan", existing?.plan ?: User.PLAN_FREEMIUM)
+            put("created_at", existing?.createdAt ?: System.currentTimeMillis())
+        }
+        database.writableDatabase.insertWithOnConflict(TABLE_USERS, null, values, SQLiteDatabase.CONFLICT_REPLACE)
+    }
 
     private fun findById(id: Long): User? = database.readableDatabase.query(
         TABLE_USERS,
@@ -93,20 +144,11 @@ class AuthRepository(
         createdAt = getLong(6),
     )
 
-    // salt:hash en hex con SHA-256. Suficiente para almacenamiento local;
-    // el backend usa BCrypt para las cuentas reales.
+    // salt:hash en hex con SHA-256. Mirror local de la contraseña para el caché offline;
+    // la validación real ahora ocurre en el backend (BCrypt) en cada sign-in.
     private fun hashPassword(password: String): String {
         val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }
         return salt.toHex() + ":" + sha256(salt + password.toByteArray()).toHex()
-    }
-
-    private fun verifyPassword(password: String, stored: String): Boolean {
-        val (saltHex, hashHex) = stored.split(":").takeIf { it.size == 2 } ?: return false
-        val salt = saltHex.chunked(2).map { it.toInt(16).toByte() }.toByteArray()
-        return MessageDigest.isEqual(
-            sha256(salt + password.toByteArray()).toHex().toByteArray(),
-            hashHex.toByteArray(),
-        )
     }
 
     private fun sha256(bytes: ByteArray): ByteArray =
