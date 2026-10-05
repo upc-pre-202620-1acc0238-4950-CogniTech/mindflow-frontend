@@ -8,6 +8,7 @@ import com.cognitech.mindflow.data.local.MindFlowDatabase.Companion.TABLE_USERS
 import com.cognitech.mindflow.data.local.SessionManager
 import com.cognitech.mindflow.data.model.User
 import com.cognitech.mindflow.data.remote.ApiClient
+import com.cognitech.mindflow.data.remote.dto.AuthenticatedUserResponse
 import com.cognitech.mindflow.data.remote.dto.SignInRequest
 import com.cognitech.mindflow.data.remote.dto.SignUpRequest
 import kotlinx.coroutines.Dispatchers
@@ -32,9 +33,10 @@ class AuthRepository(
         withContext(Dispatchers.IO) {
             try {
                 val trimmedEmail = email.trim().lowercase()
-                val signUpResponse = ApiClient.authApi.signUp(
-                    SignUpRequest(trimmedEmail, password, name.trim())
+                val signUpBody = ApiClient.toJsonBody(
+                    SignUpRequest.serializer(), SignUpRequest(trimmedEmail, password, name.trim())
                 )
+                val signUpResponse = ApiClient.authApi.signUp(signUpBody)
                 if (!signUpResponse.isSuccessful) {
                     return@withContext Result.failure(
                         AuthException(ApiClient.errorMessage(signUpResponse) ?: "No se pudo crear la cuenta")
@@ -42,13 +44,15 @@ class AuthRepository(
                 }
 
                 // El backend no emite un JWT en /sign-up; se inicia sesión justo después para obtenerlo.
-                val signInResponse = ApiClient.authApi.signIn(SignInRequest(trimmedEmail, password))
-                val auth = signInResponse.body()
-                if (!signInResponse.isSuccessful || auth == null) {
+                val signInBody = ApiClient.toJsonBody(SignInRequest.serializer(), SignInRequest(trimmedEmail, password))
+                val signInResponse = ApiClient.authApi.signIn(signInBody)
+                val signInBodyResult = signInResponse.body()
+                if (!signInResponse.isSuccessful || signInBodyResult == null) {
                     return@withContext Result.failure(
                         AuthException("Cuenta creada, pero no se pudo iniciar sesión automáticamente.")
                     )
                 }
+                val auth = ApiClient.parseBody(AuthenticatedUserResponse.serializer(), signInBodyResult)
 
                 val userId = auth.id.toLong()
                 cacheUser(userId, auth.email, password, name.trim())
@@ -64,13 +68,15 @@ class AuthRepository(
         withContext(Dispatchers.IO) {
             try {
                 val trimmedEmail = email.trim().lowercase()
-                val response = ApiClient.authApi.signIn(SignInRequest(trimmedEmail, password))
-                val auth = response.body()
-                if (!response.isSuccessful || auth == null) {
+                val body = ApiClient.toJsonBody(SignInRequest.serializer(), SignInRequest(trimmedEmail, password))
+                val response = ApiClient.authApi.signIn(body)
+                val responseBody = response.body()
+                if (!response.isSuccessful || responseBody == null) {
                     return@withContext Result.failure(
                         AuthException(ApiClient.errorMessage(response) ?: "Correo o contraseña incorrectos")
                     )
                 }
+                val auth = ApiClient.parseBody(AuthenticatedUserResponse.serializer(), responseBody)
 
                 val userId = auth.id.toLong()
                 val isNewLocalAccount = findById(userId) == null

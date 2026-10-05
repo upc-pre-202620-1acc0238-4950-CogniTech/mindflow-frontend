@@ -3,21 +3,30 @@ package com.cognitech.mindflow.data.remote
 import com.cognitech.mindflow.BuildConfig
 import com.cognitech.mindflow.data.local.SessionManager
 import com.cognitech.mindflow.data.remote.dto.ApiErrorResponse
+import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 /**
  * Composition root de la capa de red. Se inicializa una vez desde [com.cognitech.mindflow.MindFlowApplication]
  * con el [SessionManager] de la app, para que el interceptor pueda adjuntar el JWT a cada request.
+ *
+ * Los bodies se serializan/deserializan a mano con [json] (ver [toJsonBody]/[parseBody]) en vez de un
+ * Converter.Factory de terceros: para el puñado de endpoints que hoy consume el frontend es más simple
+ * y evita depender de una librería externa.
  */
 object ApiClient {
 
     private val json = Json { ignoreUnknownKeys = true }
+    private val jsonMediaType = "application/json".toMediaType()
 
     private lateinit var sessionManager: SessionManager
 
@@ -47,11 +56,16 @@ object ApiClient {
         Retrofit.Builder()
             .baseUrl(BuildConfig.API_BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
     }
 
     val authApi: AuthApi by lazy { retrofit.create(AuthApi::class.java) }
+
+    fun <T> toJsonBody(strategy: SerializationStrategy<T>, value: T): RequestBody =
+        json.encodeToString(strategy, value).toRequestBody(jsonMediaType)
+
+    fun <T> parseBody(strategy: DeserializationStrategy<T>, body: ResponseBody): T =
+        json.decodeFromString(strategy, body.string())
 
     /** Extrae el mensaje de error del body `{ "error": "..." }` que devuelve el backend en 4xx. */
     fun errorMessage(response: Response<*>): String? =
