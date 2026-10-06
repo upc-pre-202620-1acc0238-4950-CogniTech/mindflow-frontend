@@ -16,6 +16,7 @@ import okhttp3.ResponseBody
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
+import java.util.concurrent.TimeUnit
 
 /**
  * Composition root de la capa de red. Se inicializa una vez desde [com.cognitech.mindflow.MindFlowApplication]
@@ -39,6 +40,13 @@ object ApiClient {
 
     private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
+            // El default de OkHttp (10s) cortaba la respuesta del chat antes de que llegara: el
+            // backend reintenta ante un 503 de Gemini y una respuesta real a veces tarda bastante
+            // más de 10s. Con el timeout corto, la app caía al fallback local, pareciendo
+            // "genérica" aunque el backend sí terminaba generando una respuesta real.
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(90, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
             .addInterceptor { chain ->
                 val request = chain.request().newBuilder().apply {
                     if (::sessionManager.isInitialized) {
