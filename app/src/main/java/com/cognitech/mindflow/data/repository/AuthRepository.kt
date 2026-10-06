@@ -103,7 +103,14 @@ class AuthRepository(
             database.writableDatabase.update(TABLE_USERS, values, "id = ?", arrayOf(userId.toString()))
         }
 
+    /**
+     * [plan] llega en el formato local ("Freemium"/"Premium"). Intenta reflejarlo en el backend
+     * vía el endpoint demo de Subscriptions (sin credenciales reales de Stripe — ver
+     * [com.cognitech.mindflow.data.remote.SubscriptionApi]); si falla (sin red, backend caído),
+     * el cambio de plan igual se aplica localmente para no bloquear al usuario.
+     */
     suspend fun setPlan(userId: Long, plan: String) = withContext(Dispatchers.IO) {
+        runCatching { ApiClient.subscriptionApi.setDemoPlan(plan.lowercase()) }
         val values = ContentValues().apply { put("plan", plan) }
         database.writableDatabase.update(TABLE_USERS, values, "id = ?", arrayOf(userId.toString()))
     }
