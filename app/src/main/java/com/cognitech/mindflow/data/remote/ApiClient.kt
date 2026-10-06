@@ -4,8 +4,10 @@ import com.cognitech.mindflow.BuildConfig
 import com.cognitech.mindflow.data.local.SessionManager
 import com.cognitech.mindflow.data.remote.dto.ApiErrorResponse
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNamingStrategy
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody
@@ -25,7 +27,8 @@ import retrofit2.Retrofit
  */
 object ApiClient {
 
-    private val json = Json { ignoreUnknownKeys = true }
+    @OptIn(ExperimentalSerializationApi::class)
+    private val json = Json { ignoreUnknownKeys = true; namingStrategy = JsonNamingStrategy.SnakeCase }
     private val jsonMediaType = "application/json".toMediaType()
 
     private lateinit var sessionManager: SessionManager
@@ -60,6 +63,7 @@ object ApiClient {
     }
 
     val authApi: AuthApi by lazy { retrofit.create(AuthApi::class.java) }
+    val journalApi: JournalApi by lazy { retrofit.create(JournalApi::class.java) }
 
     fun <T> toJsonBody(strategy: SerializationStrategy<T>, value: T): RequestBody =
         json.encodeToString(strategy, value).toRequestBody(jsonMediaType)

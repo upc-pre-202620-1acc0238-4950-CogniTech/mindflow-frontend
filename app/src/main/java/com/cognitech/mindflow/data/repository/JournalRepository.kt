@@ -5,9 +5,19 @@ import com.cognitech.mindflow.data.ai.LocalAiResponder
 import com.cognitech.mindflow.data.local.MindFlowDatabase
 import com.cognitech.mindflow.data.local.MindFlowDatabase.Companion.TABLE_JOURNAL
 import com.cognitech.mindflow.data.model.JournalEntry
+import com.cognitech.mindflow.data.remote.ApiClient
+import com.cognitech.mindflow.data.remote.dto.CreateJournalEntryRequest
+import com.cognitech.mindflow.data.remote.dto.JournalEntryResponse
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.OffsetDateTime
 
+/**
+ * La entrada se crea contra el backend (Journal), que genera la respuesta empática real con
+ * Gemini. Si el backend no responde (sin red, backend caído), cae a la heurística local de
+ * [LocalAiResponder] para no perder la entrada — el Journal sigue siendo local-first.
+ */
 class JournalRepository(
     private val database: MindFlowDatabase,
     private val aiResponder: LocalAiResponder,
@@ -16,10 +26,15 @@ class JournalRepository(
     suspend fun create(userId: Long, content: String, category: String): JournalEntry =
         withContext(Dispatchers.IO) {
             val text = content.trim()
-            val sentiment = aiResponder.detectSentiment(text)
-            val aiResponse = aiResponder.respond(text, sentiment)
             val title = aiResponder.title(text)
-            val now = System.currentTimeMillis()
+            // Cualquier falla de red, de la API o al parsear la respuesta cae aquí: nunca debe
+            // impedir que la entrada se guarde, solo degrada a la heurística local.
+            val remote = runCatching { createRemote(text, title, category) }.getOrNull()
+
+            val sentiment = remote?.sentiment ?: aiResponder.detectSentiment(text)
+            val aiResponse = remote?.aiResponse ?: aiResponder.respond(text, sentiment)
+            val createdAt = remote?.createdAtMillis ?: System.currentTimeMillis()
+
             val values = ContentValues().apply {
                 put("user_id", userId)
                 put("title", title)
@@ -27,11 +42,30 @@ class JournalRepository(
                 put("category", category)
                 put("sentiment", sentiment)
                 put("ai_response", aiResponse)
-                put("created_at", now)
+                put("created_at", createdAt)
             }
             val id = database.writableDatabase.insertOrThrow(TABLE_JOURNAL, null, values)
-            JournalEntry(id, userId, title, text, category, sentiment, aiResponse, now)
+            JournalEntry(id, userId, title, text, category, sentiment, aiResponse, createdAt)
         }
+
+    private class RemoteJournalResult(val sentiment: String, val aiResponse: String?, val createdAtMillis: Long)
+
+    private suspend fun createRemote(content: String, title: String, category: String): RemoteJournalResult? {
+        val request = CreateJournalEntryRequest(
+            date = LocalDate.now().toString(),
+            title = title,
+            content = content,
+            sentiment = "auto",
+            category = category,
+        )
+        val body = ApiClient.toJsonBody(CreateJournalEntryRequest.serializer(), request)
+        val response = ApiClient.journalApi.createEntry(body)
+        val responseBody = response.body() ?: return null
+        if (!response.isSuccessful) return null
+        val parsed = ApiClient.parseBody(JournalEntryResponse.serializer(), responseBody)
+        val createdAtMillis = OffsetDateTime.parse(parsed.createdAt).toInstant().toEpochMilli()
+        return RemoteJournalResult(parsed.sentiment, parsed.aiResponse, createdAtMillis)
+    }
 
     suspend fun listByUser(userId: Long): List<JournalEntry> = withContext(Dispatchers.IO) {
         database.readableDatabase.query(
