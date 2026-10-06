@@ -8,8 +8,12 @@ class LocalAiResponder {
 
     fun detectSentiment(text: String): String {
         val t = text.lowercase()
-        val negatives = NEGATIVE_WORDS.count { it in t }
-        val positives = POSITIVE_WORDS.count { it in t }
+        val tokens = t.split(Regex("[^\\p{L}]+")).filter { it.isNotEmpty() }
+        val negatives = NEGATIVE_STEMS.count { stem -> tokens.any { it.startsWith(stem) } } +
+            NEGATIVE_EXACT.count { word -> tokens.any { it == word } } +
+            NEGATIVE_PHRASES.count { it in t }
+        val positives = POSITIVE_STEMS.count { stem -> tokens.any { it.startsWith(stem) } } +
+            POSITIVE_EXACT.count { word -> tokens.any { it == word } }
         return when {
             negatives > positives -> "negative"
             positives > negatives -> "positive"
@@ -67,12 +71,21 @@ class LocalAiResponder {
     }
 
     private companion object {
-        val NEGATIVE_WORDS = listOf(
-            "triste", "cansad", "abrumad", "estrés", "estres", "ansie", "mal ", "no avancé", "no avance",
-            "procrastin", "preocup", "miedo", "sola","frustr", "enoj", "agotad", "llor",
+        // Prefijos para cubrir conjugaciones/género ("cansad" -> cansado/cansada). Solo se
+        // comparan contra tokens completos (nunca contra el texto crudo), así que no capturan
+        // coincidencias accidentales a mitad de otra palabra.
+        val NEGATIVE_STEMS = listOf(
+            "triste", "cansad", "abrumad", "estrés", "estres", "ansie",
+            "procrastin", "preocup", "frustr", "enoj", "agotad", "llor",
         )
-        val POSITIVE_WORDS = listOf(
-            "feliz", "bien", "content", "logré", "logre", "alegr", "orgullos", "tranquil", "motivad", "genial",
+        val POSITIVE_STEMS = listOf(
+            "feliz", "content", "logré", "logre", "alegr", "orgullos", "tranquil", "motivad", "genial",
         )
+        // Palabras cortas que calzarían como prefijo de palabras no relacionadas
+        // ("mal" en "normal"/"animal", "bien" en "también", "sola" en "solamente"),
+        // así que exigimos coincidencia exacta de token.
+        val NEGATIVE_EXACT = listOf("mal", "sola", "miedo")
+        val POSITIVE_EXACT = listOf("bien")
+        val NEGATIVE_PHRASES = listOf("no avancé", "no avance")
     }
 }
