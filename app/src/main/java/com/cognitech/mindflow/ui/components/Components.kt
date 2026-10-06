@@ -21,10 +21,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,9 +98,10 @@ fun GradientButton(
         contentAlignment = Alignment.Center,
     ) {
         if (loading) {
-            CircularProgressIndicator(color = White, strokeWidth = 2.dp, modifier = Modifier.size(19.dp))
+            // Fijo (no reactivo): el botón siempre tiene fondo de gradiente de marca.
+            CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(19.dp))
         } else {
-            Text(text, color = White, fontWeight = FontWeight.SemiBold, fontSize = fontSize)
+            Text(text, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = fontSize)
         }
     }
 }
@@ -103,7 +113,7 @@ fun SolidButton(
     onClick: () -> Unit,
     background: Color,
     modifier: Modifier = Modifier,
-    contentColor: Color = White,
+    contentColor: Color = Color.White, // fijo: el fondo siempre es un color sólido de marca
     fontSize: TextUnit = 13.3.sp,
     radius: Dp = 6.dp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -200,6 +210,9 @@ fun MindFlowInput(
     enabled: Boolean = true,
     leading: (@Composable () -> Unit)? = null,
 ) {
+    var passwordVisible by remember { mutableStateOf(false) }
+    val obscureText = isPassword && !passwordVisible
+
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
@@ -207,7 +220,7 @@ fun MindFlowInput(
         singleLine = singleLine,
         textStyle = TextStyle(fontSize = fontSize, color = textColor, fontFamily = Inter, fontWeight = fontWeight),
         cursorBrush = SolidColor(CornflowerBlue),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+        visualTransformation = if (obscureText) PasswordVisualTransformation() else VisualTransformation.None,
         keyboardOptions = KeyboardOptions(
             keyboardType = if (isPassword) KeyboardType.Password else keyboardType,
             autoCorrectEnabled = !isPassword && keyboardType != KeyboardType.Email,
@@ -232,6 +245,15 @@ fun MindFlowInput(
                         Text(placeholder, color = Boulder, fontSize = fontSize, maxLines = if (singleLine) 1 else Int.MAX_VALUE, overflow = TextOverflow.Ellipsis)
                     }
                     inner()
+                }
+                if (isPassword) {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }, modifier = Modifier.size(24.dp)) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                            contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                            tint = Boulder,
+                        )
+                    }
                 }
             }
         },
@@ -353,7 +375,7 @@ fun FilterPill(text: String, selected: Boolean, onClick: () -> Unit) {
             .clickable(onClick = onClick)
             .padding(horizontal = 13.8.dp, vertical = 7.4.dp),
     ) {
-        Text(text, color = if (selected) White else MineShaft, fontSize = 12.8.sp)
+        Text(text, color = if (selected) Color.White else MineShaft, fontSize = 12.8.sp)
     }
 }
 
@@ -373,7 +395,7 @@ fun MindSwitch(checked: Boolean, onCheckedChange: (Boolean) -> Unit, modifier: M
             Modifier
                 .size(20.dp)
                 .shadow(1.dp, CircleShape)
-                .background(White, CircleShape)
+                .background(Color.White, CircleShape) // fijo: la perilla debe contrastar en ambos estados
         )
     }
 }
@@ -391,7 +413,7 @@ fun SquareCheck(checked: Boolean, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        if (checked) Text("✓", color = White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        if (checked) Text("✓", color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -407,7 +429,7 @@ fun RoundCheck(checked: Boolean, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        if (checked) Text("✓", color = White, fontSize = 12.8.sp, fontWeight = FontWeight.Bold)
+        if (checked) Text("✓", color = Color.White, fontSize = 12.8.sp, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -419,6 +441,6 @@ fun GradientAvatar(initial: String, size: Dp = 40.dp, fontSize: TextUnit = 16.sp
             .background(MindGradient, CircleShape),
         contentAlignment = Alignment.Center,
     ) {
-        Text(initial, color = White, fontWeight = FontWeight.Bold, fontSize = fontSize)
+        Text(initial, color = Color.White, fontWeight = FontWeight.Bold, fontSize = fontSize)
     }
 }
