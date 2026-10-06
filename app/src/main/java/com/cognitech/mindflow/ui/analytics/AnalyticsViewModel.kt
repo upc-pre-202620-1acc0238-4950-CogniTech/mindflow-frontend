@@ -19,6 +19,7 @@ import com.cognitech.mindflow.ui.common.weekStart
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.math.roundToInt
 
 data class AnalyticsState(
     val user: User? = null,
@@ -87,8 +88,12 @@ class AnalyticsViewModel(
 
     fun logout() = authRepository.logout()
 
+    // Promedio ponderado (positivo=100%, neutral=50%, negativo=25%) vía sentimentScore, consistente
+    // con el resto de la UI (p. ej. las barras del Resumen Semanal de Ánimo). Antes solo contaba
+    // entradas positivas sobre el total, así que las neutrales valían 0% igual que las negativas
+    // y el puntaje parecía sesgado hacia lo negativo aunque no hubiera entradas negativas.
     private fun List<JournalEntry>.positivity(): Int? =
-        if (isEmpty()) null else (count { it.sentiment == Sentiment.POSITIVE } * 100 / size)
+        if (isEmpty()) null else (map { sentimentScore(it.sentiment) }.average() * 100).roundToInt()
 
     private fun topWords(entries: List<JournalEntry>): List<String> =
         entries.flatMap { e ->
