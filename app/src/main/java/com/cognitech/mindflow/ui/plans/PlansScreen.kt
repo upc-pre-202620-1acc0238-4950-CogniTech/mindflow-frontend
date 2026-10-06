@@ -246,7 +246,7 @@ private fun PremiumCard(isCurrent: Boolean, onUpgrade: () -> Unit) {
                 .background(Portage, RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
                 .padding(horizontal = 24.dp, vertical = 4.8.dp)
         ) {
-            Text("RECOMENDADO", color = White, fontSize = 12.8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text("RECOMENDADO", color = Color.White, fontSize = 12.8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
         }
     }
 }
