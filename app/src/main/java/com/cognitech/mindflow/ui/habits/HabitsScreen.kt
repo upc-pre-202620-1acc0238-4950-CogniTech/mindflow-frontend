@@ -106,11 +106,12 @@ fun HabitsScreen(
 
 @Composable
 private fun Tabs(selected: HabitsTab, onSelect: (HabitsTab) -> Unit) {
+    val underlineColor = Mercury
     Box(
         Modifier
             .fillMaxWidth()
             .drawBehind {
-                drawLine(Mercury, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
+                drawLine(underlineColor, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
             }
     ) {
         Row(
@@ -265,8 +266,10 @@ private fun RoutinesCard(state: HabitsState, viewModel: HabitsViewModel) {
 
 @Composable
 private fun HabitsTable(state: HabitsState, onToggle: (Habit) -> Unit) {
+    val headerUnderline = Mercury
+    val rowDivider = CatskillWhite
     Column(Modifier.horizontalScroll(rememberScrollState())) {
-        Row(Modifier.drawBehind { drawLine(Mercury, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }) {
+        Row(Modifier.drawBehind { drawLine(headerUnderline, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }) {
             HeaderCell("Estado", ColStatus)
             HeaderCell("Hábito", ColName)
             HeaderCell("Categoría", ColCategory)
@@ -289,7 +292,7 @@ private fun HabitsTable(state: HabitsState, onToggle: (Habit) -> Unit) {
                     .alpha(if (paused) 0.5f else 1f)
                     .then(
                         if (!last) Modifier.drawBehind {
-                            drawLine(CatskillWhite, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
+                            drawLine(rowDivider, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx())
                         } else Modifier
                     ),
                 verticalAlignment = Alignment.CenterVertically,

@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -322,7 +323,8 @@ private fun CalendarDay(
         else -> CatskillWhite
     }
     val textColor = when {
-        sentiment == Sentiment.NEGATIVE -> White
+        // Fijo: el fondo de este día es un color sólido de sentimiento (sentimentColor), no una superficie.
+        sentiment == Sentiment.NEGATIVE -> Color.White
         sentiment != null -> MineShaft
         else -> Boulder
     }

@@ -29,21 +29,25 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.MindFlowApplication
 import com.cognitech.mindflow.R
 import com.cognitech.mindflow.ui.chat.ChatWidget
 import com.cognitech.mindflow.ui.theme.CatskillWhite
 import com.cognitech.mindflow.ui.theme.CornflowerBlue
 import com.cognitech.mindflow.ui.theme.Gray
+import com.cognitech.mindflow.ui.theme.LocalDarkMode
 import com.cognitech.mindflow.ui.theme.Mercury
 import com.cognitech.mindflow.ui.theme.White
 import kotlinx.coroutines.launch
@@ -73,7 +77,13 @@ fun MainScaffold(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val close: () -> Unit = { scope.launch { drawerState.close() } }
+    val context = LocalContext.current
+    // Leída directo de SharedPreferences (vía SessionManager) en cada recomposición: no necesita
+    // StateFlow porque Ajustes es un destino aparte — al volver a una pantalla principal, esta
+    // se recompone y toma el valor actualizado.
+    val darkMode = (context.applicationContext as MindFlowApplication).authRepository.session.darkMode
 
+    CompositionLocalProvider(LocalDarkMode provides darkMode) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -115,6 +125,7 @@ fun MainScaffold(
             }
             ChatWidget()
         }
+    }
     }
 }
 

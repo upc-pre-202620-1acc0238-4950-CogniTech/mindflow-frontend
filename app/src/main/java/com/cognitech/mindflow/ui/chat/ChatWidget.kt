@@ -110,7 +110,7 @@ private fun ChatFab(open: Boolean, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         if (open) {
-            Icon(Icons.Filled.Close, contentDescription = "Cerrar chat", tint = White)
+            Icon(Icons.Filled.Close, contentDescription = "Cerrar chat", tint = Color.White)
         } else {
             Image(painterResource(R.drawable.ic_chat), contentDescription = "Abrir chat con MindFlow AI")
         }
@@ -147,13 +147,13 @@ private fun ChatPanel(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text("MindFlow AI", color = White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                Text("Tu espacio seguro para conversar", color = White.copy(alpha = 0.85f), fontSize = 12.sp)
+                Text("MindFlow AI", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Text("Tu espacio seguro para conversar", color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
             }
             Icon(
                 Icons.Filled.Close,
                 contentDescription = "Cerrar chat",
-                tint = White,
+                tint = Color.White,
                 modifier = Modifier
                     .size(36.dp)
                     .clip(CircleShape)
@@ -203,7 +203,7 @@ private fun ChatPanel(
                     .clickable(enabled = canSend, onClick = onSend),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar", tint = White, modifier = Modifier.size(18.dp))
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar", tint = Color.White, modifier = Modifier.size(18.dp))
             }
         }
     }
@@ -223,7 +223,7 @@ private fun MessageBubble(message: ChatMessage, muted: Boolean = false) {
         Text(
             message.text,
             color = when {
-                message.fromUser -> White
+                message.fromUser -> Color.White
                 muted -> Gray
                 else -> MineShaft
             },
