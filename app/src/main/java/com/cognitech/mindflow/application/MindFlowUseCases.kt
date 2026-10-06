@@ -21,9 +21,8 @@ class DashboardUseCases(private val journals: JournalRepository, private val hab
 }
 data class DashboardData(val entries: List<JournalEntry>, val habits: List<Habit>)
 
-class ChatUseCases(private val ai: AiResponder) {
+class ChatUseCases(private val chat: ChatResponder) {
     fun welcome() = ChatMessage(WELCOME_MESSAGE, fromUser = false)
-    // Suspend so a remote adapter (POST /chat/conversations) can replace the local one without API changes.
-    suspend fun reply(text: String) = ChatMessage(ai.respond(text, ai.detectSentiment(text)), fromUser = false)
+    suspend fun reply(text: String) = chat.reply(text)
     private companion object { const val WELCOME_MESSAGE = "Hola, soy MindFlow AI. Estoy aquí para escucharte. ¿Cómo te sientes en este momento?" }
 }

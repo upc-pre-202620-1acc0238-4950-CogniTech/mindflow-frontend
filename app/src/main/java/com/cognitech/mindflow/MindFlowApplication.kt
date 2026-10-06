@@ -14,12 +14,13 @@ import com.cognitech.mindflow.application.JournalUseCases
 import com.cognitech.mindflow.application.ProfileUseCases
 import com.cognitech.mindflow.application.DashboardUseCases
 import com.cognitech.mindflow.application.ChatUseCases
-import com.cognitech.mindflow.infrastructure.adapter.LocalAiAdapter
+import com.cognitech.mindflow.infrastructure.adapter.RemoteChatAdapter
 import com.cognitech.mindflow.infrastructure.adapter.AndroidPreferencesAdapter
 import com.cognitech.mindflow.infrastructure.adapter.AndroidSessionAdapter
 import com.cognitech.mindflow.infrastructure.adapter.SqliteHabitAdapter
 import com.cognitech.mindflow.infrastructure.adapter.SqliteJournalAdapter
 import com.cognitech.mindflow.infrastructure.adapter.SqliteUserAdapter
+import com.cognitech.mindflow.ui.theme.ThemeState
 
 class MindFlowApplication : Application() {
 
@@ -51,6 +52,7 @@ class MindFlowApplication : Application() {
         habitRepository = HabitRepository(database)
         val sessionManager = SessionManager(this)
         ApiClient.init(sessionManager)
+        ThemeState.isDark = sessionManager.darkMode
         authRepository = AuthRepository(database, sessionManager, habitRepository)
         journalRepository = JournalRepository(database, aiResponder)
         val session = AndroidSessionAdapter(sessionManager)
@@ -59,6 +61,6 @@ class MindFlowApplication : Application() {
         habitUseCases = HabitUseCases(SqliteHabitAdapter(habitRepository))
         profileUseCases = ProfileUseCases(SqliteUserAdapter(authRepository), AndroidPreferencesAdapter(sessionManager))
         dashboardUseCases = DashboardUseCases(SqliteJournalAdapter(journalRepository), SqliteHabitAdapter(habitRepository))
-        chatUseCases = ChatUseCases(LocalAiAdapter(aiResponder))
+        chatUseCases = ChatUseCases(RemoteChatAdapter(aiResponder))
     }
 }

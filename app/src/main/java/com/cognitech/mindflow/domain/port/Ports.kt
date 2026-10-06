@@ -7,4 +7,4 @@ interface JournalRepository { suspend fun create(userId: Long, content: String, 
 interface HabitRepository { suspend fun seedDefaults(userId: Long); suspend fun create(userId: Long, name: String, frequency: HabitFrequency); suspend fun listByUser(userId: Long): List<Habit>; suspend fun toggleToday(habitId: Long); suspend fun history(userId: Long, limit: Int = 30): List<HabitLog> }
 interface SessionPort { fun isLoggedIn(): Boolean; fun login(userId: Long); fun logout(); fun currentUserId(): Long? }
 interface PreferencesPort { var pinLock: Boolean; var darkMode: Boolean; var habitReminders: Boolean }
-interface AiResponder { fun detectSentiment(text: String): Sentiment; fun title(text: String): String; fun respond(text: String, sentiment: Sentiment): String; fun weeklyInsight(positive: Int, neutral: Int, negative: Int, topCategory: String?): String }
+interface ChatResponder { suspend fun reply(text: String): ChatMessage }
