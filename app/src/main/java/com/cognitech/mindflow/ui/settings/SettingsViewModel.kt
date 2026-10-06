@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cognitech.mindflow.data.model.User
 import com.cognitech.mindflow.data.repository.AuthRepository
+import com.cognitech.mindflow.ui.theme.ThemeState
 import kotlinx.coroutines.launch
 
 data class SettingsState(
@@ -53,6 +54,7 @@ class SettingsViewModel(private val authRepository: AuthRepository) : ViewModel(
 
     fun onDarkModeChange(value: Boolean) {
         session.darkMode = value
+        ThemeState.isDark = value
         state = state.copy(darkMode = value)
     }
 
