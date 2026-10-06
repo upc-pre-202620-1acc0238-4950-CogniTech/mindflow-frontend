@@ -133,7 +133,7 @@ fun PlansScreen(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Image(painterResource(R.drawable.ic_lock), contentDescription = null, modifier = Modifier.size(16.dp))
                 Text(
-                    "Pagos encriptados y procesados de forma segura a través de Stripe (US34).",
+                    "Pagos encriptados y procesados de forma segura a través de Stripe.",
                     color = Gray,
                     fontSize = 12.8.sp,
                     textAlign = TextAlign.Center,
