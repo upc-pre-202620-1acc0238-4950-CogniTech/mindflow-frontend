@@ -23,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -111,7 +112,7 @@ fun InterventionDialog(type: Intervention, onDismiss: () -> Unit) {
                         val label = if (type == Intervention.MICRO_MEDITATION) {
                             "%d:%02d".format(secondsLeft / 60, secondsLeft % 60)
                         } else secondsLeft.toString()
-                        Text(label, color = White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                        Text(label, color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
                     }
                 }
                 Text(

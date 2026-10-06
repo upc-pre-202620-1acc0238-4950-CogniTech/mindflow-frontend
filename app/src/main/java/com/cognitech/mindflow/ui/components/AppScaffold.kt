@@ -1,6 +1,5 @@
 package com.cognitech.mindflow.ui.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,29 +21,36 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.cognitech.mindflow.R
 import com.cognitech.mindflow.ui.chat.ChatWidget
 import com.cognitech.mindflow.ui.theme.CatskillWhite
 import com.cognitech.mindflow.ui.theme.CornflowerBlue
 import com.cognitech.mindflow.ui.theme.Gray
+import com.cognitech.mindflow.ui.theme.LocalDarkMode
 import com.cognitech.mindflow.ui.theme.Mercury
+import com.cognitech.mindflow.ui.theme.MenuButtonBg
+import com.cognitech.mindflow.ui.theme.MineShaft
+import com.cognitech.mindflow.ui.theme.ThemeState
 import com.cognitech.mindflow.ui.theme.White
 import kotlinx.coroutines.launch
 
@@ -73,7 +79,11 @@ fun MainScaffold(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val close: () -> Unit = { scope.launch { drawerState.close() } }
+    // State de Compose (no una relectura de SharedPreferences): togglear el switch en Ajustes
+    // recompone esto al instante, sin tener que navegar a otra pantalla primero.
+    val darkMode = ThemeState.isDark
 
+    CompositionLocalProvider(LocalDarkMode provides darkMode) {
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -116,6 +126,7 @@ fun MainScaffold(
             ChatWidget()
         }
     }
+    }
 }
 
 @Composable
@@ -133,14 +144,16 @@ private fun AppDrawerContent(
     ) {
         Row(Modifier.fillMaxWidth().padding(bottom = 40.dp), verticalAlignment = Alignment.Top) {
             MindFlowLogo(Modifier.weight(1f))
-            Image(
-                painter = painterResource(R.drawable.ic_menu_close),
-                contentDescription = "Cerrar menú",
+            Box(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(10.dp))
+                    .background(MenuButtonBg)
                     .clickable(onClick = onClose),
-            )
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Filled.Close, contentDescription = "Cerrar menú", tint = MineShaft)
+            }
         }
         MainDestination.entries.forEach { destination ->
             DrawerLink(destination.label, selected = destination == current) { onSelect(destination) }
@@ -178,17 +191,19 @@ private fun DrawerLink(label: String, selected: Boolean, onClick: () -> Unit) {
     }
 }
 
-/** Botón "Abrir menú" (44x44, fondo #F7F7FC) exportado del Figma. */
+/** Botón "Abrir menú" (44x44, fondo reactivo a Modo Oscuro) del Figma. */
 @Composable
 fun MenuButton(onClick: () -> Unit) {
-    Image(
-        painter = painterResource(R.drawable.ic_menu_open),
-        contentDescription = "Abrir menú",
+    Box(
         modifier = Modifier
             .size(44.dp)
             .clip(RoundedCornerShape(10.dp))
+            .background(MenuButtonBg)
             .clickable(onClick = onClick),
-    )
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(Icons.Filled.Menu, contentDescription = "Abrir menú", tint = MineShaft)
+    }
 }
 
 /** Header blanco de 70dp con borde inferior #E5E5E5. */

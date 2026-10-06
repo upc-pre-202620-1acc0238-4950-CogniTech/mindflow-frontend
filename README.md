@@ -53,20 +53,29 @@ Degradado de marca: `#4F8DF5 → #6ED3A3`.
 
 La sesión activa y las preferencias se guardan en `SharedPreferences`.
 
-## Integración con el backend (pendiente)
+## Integración con el backend
 
-La app funciona 100% offline. Para conectarla con `mindflow-backend` (ASP.NET, JSON en `snake_case`, JWT `Bearer`):
+**Login / Registro ya están conectados** a `mindflow-backend` (ASP.NET, JSON en `snake_case`, JWT `Bearer`) vía Retrofit + OkHttp (`data/remote/`). El resto de pantallas sigue siendo 100% local por ahora — se sincronizarán con el backend en un paso posterior.
 
-| App | Endpoint del backend |
+| App | Endpoint del backend | Estado |
+|---|---|---|
+| Login / Registro | `POST api/v1/users/sign-in`, `POST api/v1/users/sign-up` | ✅ Conectado |
+| Perfil | `GET/PUT api/v1/users/profile`, `DELETE api/v1/users` | Pendiente |
+| Journal | `GET/POST api/v1/journal/entries`, `POST api/v1/journal/entries/sync` | Pendiente — hoy usa SQLite como caché local |
+| Hábitos | `GET/POST api/v1/habits`, `POST api/v1/habit-logs`, `POST api/v1/habits/suggestions` | Pendiente — hoy usa SQLite como caché local |
+| MindFlow AI | `POST api/v1/chat/conversations` (Gemini) | Pendiente — hoy lo reemplaza `LocalAiResponder` |
+| Estrés | `POST api/v1/wellness/stress-check` | Pendiente — hoy se calcula localmente |
+
+### Cómo apuntar al backend local
+
+El backend corre en un puerto fijo (`5166`, ver README de `mindflow-backend`). La base URL se configura en `app/build.gradle.kts` (`buildConfigField("String", "API_BASE_URL", ...)`):
+
+| Cliente | Base URL a usar |
 |---|---|
-| Login / Registro | `POST /api/v1/users/sign-in`, `POST /api/v1/users/sign-up` |
-| Perfil | `GET/PUT /api/v1/users/profile`, `DELETE /api/v1/users` |
-| Journal | `GET/POST /journal/entries`, `POST /journal/entries/sync` (offline-first con `client_id`) |
-| Hábitos | `GET/POST /habits`, `POST /habit-logs`, `POST /habits/suggestions` |
-| MindFlow AI | `POST /chat/conversations` (Gemini) — hoy lo reemplaza `LocalAiResponder` |
-| Estrés | `POST /wellness/stress-check` — hoy se calcula localmente |
+| Emulador Android (por defecto) | `http://10.0.2.2:5166/` |
+| Dispositivo físico | `http://<IP-LAN-de-tu-PC>:5166/` (misma red Wi-Fi) |
 
-El backend no tiene URL pública todavía; en local (`dotnet run`) el emulador lo alcanza en `http://10.0.2.2:5000`.
+El cleartext (HTTP sin TLS) solo está habilitado para `10.0.2.2` en `res/xml/network_security_config.xml` — si pruebas en un dispositivo físico, agrega ahí la IP LAN de tu PC.
 
 ## Estructura
 
@@ -77,6 +86,7 @@ app/src/main/java/com/cognitech/mindflow/
 │   ├── export/        ReportExporter (PDF / CSV)
 │   ├── local/         MindFlowDatabase (SQLite), SessionManager
 │   ├── model/         User, JournalEntry, Habit, HabitLog
+│   ├── remote/        ApiClient (Retrofit/OkHttp), AuthApi, DTOs
 │   └── repository/    AuthRepository, JournalRepository, HabitRepository
 ├── ui/
 │   ├── auth/          Login, Registro
@@ -96,9 +106,10 @@ app/src/main/java/com/cognitech/mindflow/
 
 ## Cómo ejecutar
 
-1. Abrir la carpeta en Android Studio.
-2. Esperar la sincronización de Gradle.
-3. Ejecutar `app` en un emulador o dispositivo (Android 8.0+).
+1. Levantar `mindflow-backend` en local (ver su README) — necesario para que Login/Registro funcionen.
+2. Abrir esta carpeta en Android Studio.
+3. Esperar la sincronización de Gradle.
+4. Ejecutar `app` en un emulador o dispositivo (Android 8.0+).
 
 Por línea de comandos:
 

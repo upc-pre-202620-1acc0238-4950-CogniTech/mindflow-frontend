@@ -133,7 +133,7 @@ fun PlansScreen(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Image(painterResource(R.drawable.ic_lock), contentDescription = null, modifier = Modifier.size(16.dp))
                 Text(
-                    "Pagos encriptados y procesados de forma segura a través de Stripe (US34).",
+                    "Pagos encriptados y procesados de forma segura a través de Stripe.",
                     color = Gray,
                     fontSize = 12.8.sp,
                     textAlign = TextAlign.Center,
@@ -246,7 +246,7 @@ private fun PremiumCard(isCurrent: Boolean, onUpgrade: () -> Unit) {
                 .background(Portage, RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
                 .padding(horizontal = 24.dp, vertical = 4.8.dp)
         ) {
-            Text("RECOMENDADO", color = White, fontSize = 12.8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text("RECOMENDADO", color = Color.White, fontSize = 12.8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
         }
     }
 }

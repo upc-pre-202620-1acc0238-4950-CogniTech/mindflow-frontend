@@ -1,24 +1,21 @@
 package com.cognitech.mindflow.application
 
-import com.cognitech.mindflow.domain.model.Sentiment
-import com.cognitech.mindflow.domain.port.AiResponder
+import com.cognitech.mindflow.domain.model.ChatMessage
+import com.cognitech.mindflow.domain.port.ChatResponder
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Test
 
 class ChatUseCasesTest {
-    private val ai = object : AiResponder {
-        override fun detectSentiment(text: String) = Sentiment.NEGATIVE
-        override fun title(text: String) = ""
-        override fun respond(text: String, sentiment: Sentiment) = "${sentiment.name}: $text"
-        override fun weeklyInsight(positive: Int, neutral: Int, negative: Int, topCategory: String?) = ""
+    private val responder = object : ChatResponder {
+        override suspend fun reply(text: String) = ChatMessage("REPLY: $text", fromUser = false)
     }
-    private val chat = ChatUseCases(ai)
+    private val chat = ChatUseCases(responder)
 
-    @Test fun `replies as the assistant using the detected sentiment`() {
+    @Test fun `replies as the assistant`() {
         val reply = runBlocking { chat.reply("Estoy cansado") }
-        assertEquals("NEGATIVE: Estoy cansado", reply.text)
+        assertEquals("REPLY: Estoy cansado", reply.text)
         assertFalse(reply.fromUser)
     }
 

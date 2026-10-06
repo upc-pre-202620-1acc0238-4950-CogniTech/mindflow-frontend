@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Permite tráfico HTTP sin cifrar (cleartext) solo hacia el backend local de desarrollo.
+    Android bloquea HTTP plano por defecto desde API 28. 10.0.2.2 es el alias del emulador
+    hacia el localhost del host. Si pruebas en un dispositivo físico, agrega aquí la IP LAN
+    de tu PC (ej. 192.168.1.50) como otro <domain>.
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="false">10.0.2.2</domain>
+        <!-- IP LAN del PC para pruebas en dispositivo físico — actualiza si cambia (ver `ipconfig`) -->
+        <domain includeSubdomains="false">10.82.158.158</domain>
+    </domain-config>
+</network-security-config>

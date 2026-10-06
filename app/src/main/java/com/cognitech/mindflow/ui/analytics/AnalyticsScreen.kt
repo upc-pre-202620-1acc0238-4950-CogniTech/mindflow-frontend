@@ -223,13 +223,14 @@ private fun FluctuationCard(state: AnalyticsState) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text("Fluctuación Emocional (Última Semana)", color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
+        val baselineColor = CatskillWhite
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
                 .drawBehind {
                     val stroke = 2.dp.toPx()
-                    drawLine(CatskillWhite, Offset(0f, size.height - stroke / 2), Offset(size.width, size.height - stroke / 2), stroke)
+                    drawLine(baselineColor, Offset(0f, size.height - stroke / 2), Offset(size.width, size.height - stroke / 2), stroke)
                 }
                 .padding(top = 16.dp, bottom = 18.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -259,18 +260,18 @@ private fun FluctuationCard(state: AnalyticsState) {
 
 private data class WordSlot(val x: Dp, val y: Dp, val size: TextUnit, val bold: Boolean, val color: Color)
 
-// Posiciones, tamaños y colores de la nube de palabras del Figma, ordenados por frecuencia.
-private val WordSlots = listOf(
-    WordSlot(100.dp, 65.dp, 30.sp, true, Blue400),
-    WordSlot(35.dp, 25.dp, 24.sp, true, CornflowerBlue),
-    WordSlot(210.dp, 25.dp, 20.sp, false, Purple500),
-    WordSlot(175.dp, 140.dp, 18.sp, false, Downy),
-    WordSlot(40.dp, 105.dp, 16.sp, false, Orange400),
-    WordSlot(35.dp, 150.dp, 14.sp, false, Gray400),
-)
-
 @Composable
 private fun WordCloudCard(words: List<String>) {
+    // Posiciones, tamaños y colores de la nube de palabras del Figma, ordenados por frecuencia.
+    // Se arma aquí (no como val de nivel superior) porque Gray400 es @Composable (reactivo a Modo Oscuro).
+    val wordSlots = listOf(
+        WordSlot(100.dp, 65.dp, 30.sp, true, Blue400),
+        WordSlot(35.dp, 25.dp, 24.sp, true, CornflowerBlue),
+        WordSlot(210.dp, 25.dp, 20.sp, false, Purple500),
+        WordSlot(175.dp, 140.dp, 18.sp, false, Downy),
+        WordSlot(40.dp, 105.dp, 16.sp, false, Orange400),
+        WordSlot(35.dp, 150.dp, 14.sp, false, Gray400),
+    )
     MindCard(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text("Nube de palabras frecuentes", color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
         BoxWithConstraints(
@@ -289,7 +290,7 @@ private fun WordCloudCard(words: List<String>) {
                     modifier = Modifier.align(Alignment.Center).padding(horizontal = 16.dp),
                 )
             }
-            words.zip(WordSlots).forEach { (word, slot) ->
+            words.zip(wordSlots).forEach { (word, slot) ->
                 Text(
                     word,
                     color = slot.color,
@@ -308,6 +309,7 @@ private fun TrendCard(scores: List<Float?>) {
     val shape = RoundedCornerShape(32.dp)
     val measurer = rememberTextMeasurer()
     val labelStyle = TextStyle(color = Gray500, fontSize = 12.sp, fontWeight = FontWeight.Medium, fontFamily = Inter)
+    val gridLineColor = Gray100
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -337,7 +339,7 @@ private fun TrendCard(scores: List<Float?>) {
                 // Eje Y 0..10 y líneas guía
                 for (v in 0..10 step 2) {
                     val y = bottom - chartH * v / 10f
-                    drawLine(Gray100, Offset(left, y), Offset(right, y), 1.dp.toPx())
+                    drawLine(gridLineColor, Offset(left, y), Offset(right, y), 1.dp.toPx())
                     val text = measurer.measure(v.toString(), labelStyle)
                     drawText(text, topLeft = Offset(left - text.size.width - 6.dp.toPx(), y - text.size.height / 2))
                 }

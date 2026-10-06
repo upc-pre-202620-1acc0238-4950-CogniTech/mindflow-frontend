@@ -1,6 +1,5 @@
 package com.cognitech.mindflow.infrastructure.adapter
 
-import com.cognitech.mindflow.data.ai.LocalAiResponder
 import com.cognitech.mindflow.data.model.User as LegacyUser
 import com.cognitech.mindflow.data.model.JournalEntry as LegacyJournalEntry
 import com.cognitech.mindflow.data.model.Habit as LegacyHabit
@@ -36,12 +35,6 @@ class SqliteHabitAdapter(private val source: HabitRepository) : com.cognitech.mi
     override suspend fun listByUser(userId: Long) = source.listByUser(userId).map(::habit)
     override suspend fun toggleToday(habitId: Long) { source.toggleToday(habitId) }
     override suspend fun history(userId: Long, limit: Int) = source.history(userId, limit).map { HabitLog(it.habitName, category(it.category), LocalDate.parse(it.date)) }
-}
-class LocalAiAdapter(private val source: LocalAiResponder) : AiResponder {
-    override fun detectSentiment(text: String) = Sentiment.fromStorage(source.detectSentiment(text))
-    override fun title(text: String) = source.title(text)
-    override fun respond(text: String, sentiment: Sentiment) = source.respond(text, sentiment.name.lowercase())
-    override fun weeklyInsight(positive: Int, neutral: Int, negative: Int, topCategory: String?) = source.weeklyInsight(positive, neutral, negative, topCategory)
 }
 private fun user(x: LegacyUser) = User(x.id, x.email, x.name, x.occupation, x.timezone, x.plan, x.createdAt)
 private fun entry(x: LegacyJournalEntry) = JournalEntry(x.id, x.userId, x.title, x.content, x.category, Sentiment.fromStorage(x.sentiment), x.aiResponse, x.createdAt)

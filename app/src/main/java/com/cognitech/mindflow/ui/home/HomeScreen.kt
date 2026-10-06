@@ -93,7 +93,14 @@ fun HomeScreen(
             viewModel.logout()
             onLogout()
         },
-        header = { openMenu -> HomeHeader(firstName, state.user?.initial ?: "U", openMenu) },
+        header = { openMenu ->
+            HomeHeader(
+                firstName = firstName,
+                initial = state.user?.initial ?: "U",
+                onMenuClick = openMenu,
+                onAvatarClick = { onNavigate(MainDestination.SETTINGS) },
+            )
+        },
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -135,7 +142,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader(firstName: String, initial: String, onMenuClick: () -> Unit) {
+private fun HomeHeader(firstName: String, initial: String, onMenuClick: () -> Unit, onAvatarClick: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(White)) {
         Row(
             modifier = Modifier
@@ -157,7 +164,7 @@ private fun HomeHeader(firstName: String, initial: String, onMenuClick: () -> Un
                     overflow = TextOverflow.Ellipsis,
                 )
             }
-            GradientAvatar(initial)
+            GradientAvatar(initial, modifier = Modifier.clickable(onClick = onAvatarClick))
         }
         HorizontalDivider(color = Mercury)
     }
@@ -365,11 +372,12 @@ private fun WeeklyMoodCard(entries: List<JournalEntry>, onFullReport: () -> Unit
     }
 }
 
+// No-reactivo: son colores fijos de acento por sentimiento (como un badge), no superficies de la app.
 fun sentimentColor(sentiment: String?): Color = when (sentiment) {
     Sentiment.POSITIVE -> Downy
     Sentiment.NEGATIVE -> VividTangerine
     Sentiment.NEUTRAL -> GoldenTainoi
-    else -> CatskillWhite
+    else -> Color(0xFFF5F7FA)
 }
 
 @Composable

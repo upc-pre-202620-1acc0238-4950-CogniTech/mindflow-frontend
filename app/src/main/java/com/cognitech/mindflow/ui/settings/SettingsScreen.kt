@@ -24,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -46,7 +47,6 @@ import com.cognitech.mindflow.ui.theme.Downy
 import com.cognitech.mindflow.ui.theme.Gray
 import com.cognitech.mindflow.ui.theme.MineShaft
 import com.cognitech.mindflow.ui.theme.Portage
-import com.cognitech.mindflow.ui.theme.Silver
 import com.cognitech.mindflow.ui.theme.SunsetOrange
 import com.cognitech.mindflow.ui.theme.White
 
@@ -220,23 +220,28 @@ private fun PreferenceRow(title: String, subtitle: String, checked: Boolean, onC
     }
 }
 
+// Tarjeta de marca con fondo oscuro fijo (no reactivo a Modo Oscuro): es un acento de diseño,
+// no una superficie de la app, igual que el panel oscuro de Registro.
+private val SubscriptionCardBg = Color(0xFF2F2F2F)
+private val SubscriptionCardText = Color(0xFFCCCCCC)
+
 @Composable
 private fun SubscriptionCard(isPremium: Boolean, onUpgrade: () -> Unit) {
-    MindCard(background = MineShaft, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    MindCard(background = SubscriptionCardBg, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Suscripción", color = Downy, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
         Text(
             buildAnnotatedString {
                 append("Plan Actual: ")
-                withStyle(SpanStyle(color = White, fontWeight = FontWeight.Bold)) { append(if (isPremium) "Premium" else "Freemium") }
+                withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) { append(if (isPremium) "Premium" else "Freemium") }
             },
-            color = Silver,
+            color = SubscriptionCardText,
             fontSize = 13.6.sp,
         )
         Column(Modifier.padding(top = 16.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("✔️ IA Mood Journal", color = Silver, fontSize = 13.6.sp)
-            Text("✔️ Gestor de Hábitos", color = Silver, fontSize = 13.6.sp)
-            Text(if (isPremium) "✔️ Exportación a PDF" else "❌ Exportación a PDF", color = Silver.copy(alpha = if (isPremium) 1f else 0.5f), fontSize = 13.6.sp)
-            Text(if (isPremium) "✔️ Reportes Clínicos" else "❌ Reportes Clínicos", color = Silver.copy(alpha = if (isPremium) 1f else 0.5f), fontSize = 13.6.sp)
+            Text("✔️ IA Mood Journal", color = SubscriptionCardText, fontSize = 13.6.sp)
+            Text("✔️ Gestor de Hábitos", color = SubscriptionCardText, fontSize = 13.6.sp)
+            Text(if (isPremium) "✔️ Exportación a PDF" else "❌ Exportación a PDF", color = SubscriptionCardText.copy(alpha = if (isPremium) 1f else 0.5f), fontSize = 13.6.sp)
+            Text(if (isPremium) "✔️ Reportes Clínicos" else "❌ Reportes Clínicos", color = SubscriptionCardText.copy(alpha = if (isPremium) 1f else 0.5f), fontSize = 13.6.sp)
         }
         SolidButton(
             text = if (isPremium) "Gestionar Plan" else "Mejorar a Premium",
