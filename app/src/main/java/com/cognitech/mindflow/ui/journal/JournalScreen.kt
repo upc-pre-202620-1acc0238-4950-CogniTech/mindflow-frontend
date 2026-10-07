@@ -49,7 +49,6 @@ import com.cognitech.mindflow.ui.common.toLocalDate
 import com.cognitech.mindflow.ui.components.FilterPill
 import com.cognitech.mindflow.ui.components.MainDestination
 import com.cognitech.mindflow.ui.components.MainScaffold
-import com.cognitech.mindflow.ui.components.MenuButton
 import com.cognitech.mindflow.ui.components.MindCard
 import com.cognitech.mindflow.ui.components.MindFlowInput
 import com.cognitech.mindflow.ui.components.Tag
@@ -71,7 +70,6 @@ import java.time.format.DateTimeFormatter
 fun JournalScreen(
     viewModel: JournalViewModel,
     onNavigate: (MainDestination) -> Unit,
-    onLogout: () -> Unit,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
     val state = viewModel.state
@@ -79,11 +77,7 @@ fun JournalScreen(
     MainScaffold(
         current = MainDestination.JOURNAL,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu -> JournalHeader(state.query, viewModel::onQueryChange, openMenu) },
+        header = { JournalHeader(state.query, viewModel::onQueryChange) },
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -108,7 +102,7 @@ fun JournalScreen(
 }
 
 @Composable
-private fun JournalHeader(query: String, onQueryChange: (String) -> Unit, onMenuClick: () -> Unit) {
+private fun JournalHeader(query: String, onQueryChange: (String) -> Unit) {
     Column(Modifier.fillMaxWidth().background(White)) {
         Column(
             modifier = Modifier
@@ -117,7 +111,6 @@ private fun JournalHeader(query: String, onQueryChange: (String) -> Unit, onMenu
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                MenuButton(onMenuClick)
                 Text("Tu Historial Emocional", color = MineShaft, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             }
             MindFlowInput(

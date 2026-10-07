@@ -52,7 +52,6 @@ import com.cognitech.mindflow.ui.components.InterventionDialog
 import com.cognitech.mindflow.ui.components.LeftAccentCard
 import com.cognitech.mindflow.ui.components.MainDestination
 import com.cognitech.mindflow.ui.components.MainScaffold
-import com.cognitech.mindflow.ui.components.MenuButton
 import com.cognitech.mindflow.ui.components.MindCard
 import com.cognitech.mindflow.ui.components.MindFlowInput
 import com.cognitech.mindflow.ui.components.OutlineButton
@@ -79,7 +78,6 @@ private const val RECENT_LIMIT = 3
 fun HomeScreen(
     viewModel: HomeViewModel,
     onNavigate: (MainDestination) -> Unit,
-    onLogout: () -> Unit,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
     val state = viewModel.state
@@ -89,15 +87,10 @@ fun HomeScreen(
     MainScaffold(
         current = MainDestination.DASHBOARD,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu ->
+        header = {
             HomeHeader(
                 firstName = firstName,
                 initial = state.user?.initial ?: "U",
-                onMenuClick = openMenu,
                 onAvatarClick = { onNavigate(MainDestination.SETTINGS) },
             )
         },
@@ -142,7 +135,7 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader(firstName: String, initial: String, onMenuClick: () -> Unit, onAvatarClick: () -> Unit) {
+private fun HomeHeader(firstName: String, initial: String, onAvatarClick: () -> Unit) {
     Column(Modifier.fillMaxWidth().background(White)) {
         Row(
             modifier = Modifier
@@ -152,7 +145,6 @@ private fun HomeHeader(firstName: String, initial: String, onMenuClick: () -> Un
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            MenuButton(onMenuClick)
             Column(Modifier.weight(1f)) {
                 Text("Hola, $firstName", color = MineShaft, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Text(

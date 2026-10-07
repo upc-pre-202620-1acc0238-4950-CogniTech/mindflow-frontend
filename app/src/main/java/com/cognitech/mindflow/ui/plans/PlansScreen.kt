@@ -112,7 +112,6 @@ class PlansViewModel(private val authRepository: AuthRepository) : ViewModel() {
 fun PlansScreen(
     viewModel: PlansViewModel,
     onNavigate: (MainDestination) -> Unit,
-    onLogout: () -> Unit,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
     val isPremium = viewModel.user?.isPremium == true
@@ -143,11 +142,7 @@ fun PlansScreen(
     MainScaffold(
         current = MainDestination.PLANS,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu -> ScreenHeader("Planes", openMenu) },
+        header = { ScreenHeader("Planes") },
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 48.dp),

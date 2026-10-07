@@ -75,7 +75,6 @@ private val ColStreak = 150.dp
 fun HabitsScreen(
     viewModel: HabitsViewModel,
     onNavigate: (MainDestination) -> Unit,
-    onLogout: () -> Unit,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
     val state = viewModel.state
@@ -83,11 +82,7 @@ fun HabitsScreen(
     MainScaffold(
         current = MainDestination.HABITS,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu -> ScreenHeader("Hábitos", openMenu, titleSize = 20) },
+        header = { ScreenHeader("Hábitos", titleSize = 20) },
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp),

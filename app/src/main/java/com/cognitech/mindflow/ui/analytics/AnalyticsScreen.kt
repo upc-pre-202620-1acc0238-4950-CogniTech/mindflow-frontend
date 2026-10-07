@@ -82,7 +82,6 @@ private val DayLabels = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"
 fun AnalyticsScreen(
     viewModel: AnalyticsViewModel,
     onNavigate: (MainDestination) -> Unit,
-    onLogout: () -> Unit,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
     val state = viewModel.state
@@ -102,11 +101,7 @@ fun AnalyticsScreen(
     MainScaffold(
         current = MainDestination.ANALYTICS,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu -> ScreenHeader("Analíticas y Tendencias", openMenu) },
+        header = { ScreenHeader("Analíticas y Tendencias") },
     ) {
         Box(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) { WeeklySummaryCard(state) }
         Column(

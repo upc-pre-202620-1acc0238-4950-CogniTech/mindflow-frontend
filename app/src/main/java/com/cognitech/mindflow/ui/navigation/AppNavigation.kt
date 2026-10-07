@@ -79,14 +79,12 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
                     initializer { HomeViewModel(legacyAuth, app.journalRepository, app.habitRepository) }
                 }),
                 onNavigate = onNavigate,
-                onLogout = onLogout,
             )
         }
         composable(MainDestination.JOURNAL.route) {
             JournalScreen(
                 viewModel = viewModel(factory = viewModelFactory { initializer { JournalViewModel(legacyAuth, app.journalRepository) } }),
                 onNavigate = onNavigate,
-                onLogout = onLogout,
             )
         }
         composable(MainDestination.HABITS.route) {
@@ -95,7 +93,6 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
                     initializer { HabitsViewModel(legacyAuth, app.habitRepository, app.journalRepository) }
                 }),
                 onNavigate = onNavigate,
-                onLogout = onLogout,
             )
         }
         composable(MainDestination.ANALYTICS.route) {
@@ -104,7 +101,6 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
                     initializer { AnalyticsViewModel(legacyAuth, app.journalRepository, app.habitRepository, app.aiResponder) }
                 }),
                 onNavigate = onNavigate,
-                onLogout = onLogout,
             )
         }
         composable(MainDestination.SETTINGS.route) {
@@ -118,7 +114,6 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
             PlansScreen(
                 viewModel = viewModel(factory = viewModelFactory { initializer { PlansViewModel(legacyAuth) } }),
                 onNavigate = onNavigate,
-                onLogout = onLogout,
             )
         }
     }

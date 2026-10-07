@@ -67,14 +67,15 @@ fun SettingsScreen(
         if (state.saved) Toast.makeText(context, "Cambios guardados", Toast.LENGTH_SHORT).show()
     }
 
+    val logout: () -> Unit = {
+        viewModel.logout()
+        onLogout()
+    }
+
     MainScaffold(
         current = MainDestination.SETTINGS,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu -> ScreenHeader("Ajustes y Privacidad", openMenu) },
+        header = { ScreenHeader("Ajustes y Privacidad") },
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
@@ -85,6 +86,7 @@ fun SettingsScreen(
             }
             PreferencesCard(state, viewModel)
             SubscriptionCard(isPremium = state.user?.isPremium == true, onUpgrade = { onNavigate(MainDestination.PLANS) })
+            OutlineButton("Cerrar sesión", onClick = logout, modifier = Modifier.fillMaxWidth())
             MindCard(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text("Soporte Técnico", color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
                 OutlineButton("Generar Ticket de Ayuda", onClick = { dialog = SupportDialog.TICKET }, modifier = Modifier.fillMaxWidth())
