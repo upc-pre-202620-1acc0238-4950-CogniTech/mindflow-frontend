@@ -19,8 +19,8 @@ android {
 
         // Backend local. 10.0.2.2 es el alias del emulador Android hacia el localhost del host;
         // para un dispositivo físico usa la IP LAN de tu PC (ambos en la misma red Wi-Fi) — hoy
-        // es 10.82.158.158, pero cambia si tu PC se reconecta o cambias de red (revisa `ipconfig`).
-        buildConfigField("String", "API_BASE_URL", "\"http://10.82.158.158:5166/\"")
+        // es 192.168.1.15, pero cambia si tu PC se reconecta o cambias de red (revisa `ipconfig`).
+        buildConfigField("String", "API_BASE_URL", "\"http://192.168.1.15:5166/\"")
     }
 
     buildTypes {
