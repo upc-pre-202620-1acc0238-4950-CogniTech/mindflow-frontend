@@ -36,11 +36,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.R
 import com.cognitech.mindflow.data.model.Habit
 import com.cognitech.mindflow.data.model.HabitFrequencies
 import com.cognitech.mindflow.data.model.HabitLog
@@ -75,7 +78,6 @@ private val ColStreak = 150.dp
 fun HabitsScreen(
     viewModel: HabitsViewModel,
     onNavigate: (MainDestination) -> Unit,
-    onLogout: () -> Unit,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
     val state = viewModel.state
@@ -83,11 +85,7 @@ fun HabitsScreen(
     MainScaffold(
         current = MainDestination.HABITS,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu -> ScreenHeader("Hábitos", openMenu, titleSize = 20) },
+        header = { ScreenHeader(stringResource(R.string.habits_title), titleSize = 20) },
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 32.dp),
@@ -121,7 +119,7 @@ private fun Tabs(selected: HabitsTab, onSelect: (HabitsTab) -> Unit) {
             HabitsTab.entries.forEach { tab ->
                 val active = tab == selected
                 Text(
-                    tab.label,
+                    tab.displayLabel(),
                     color = if (active) CornflowerBlue else Gray,
                     fontSize = 14.4.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -141,6 +139,25 @@ private fun Tabs(selected: HabitsTab, onSelect: (HabitsTab) -> Unit) {
 }
 
 @Composable
+private fun HabitsTab.displayLabel(): String = stringResource(
+    when (this) {
+        HabitsTab.ROUTINES -> R.string.habits_tab_routines
+        HabitsTab.SUGGESTIONS -> R.string.habits_tab_suggestions
+        HabitsTab.HISTORY -> R.string.habits_tab_history
+    }
+)
+
+@Composable
+private fun HabitStatusFilter.displayLabel(): String = stringResource(
+    when (this) {
+        HabitStatusFilter.ALL -> R.string.common_all
+        HabitStatusFilter.COMPLETED -> R.string.habits_status_completed
+        HabitStatusFilter.PENDING -> R.string.habits_status_pending
+        HabitStatusFilter.PAUSED -> R.string.habits_status_paused
+    }
+)
+
+@Composable
 private fun StressAlert() {
     LeftAccentCard(
         accent = Zest,
@@ -152,13 +169,13 @@ private fun StressAlert() {
             Text("⚠️", fontSize = 19.2.sp, color = MineShaft)
             Column {
                 Text(
-                    "MindFlow AI detecta niveles de estrés por encima del promedio.",
+                    stringResource(R.string.habits_stress_alert_title),
                     color = MineShaft,
                     fontSize = 15.2.sp,
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    "Hemos pausado tus tareas de alta exigencia cognitiva automáticamente. Prioriza hoy tu bienestar y descanso.",
+                    stringResource(R.string.habits_stress_alert_body),
                     color = DoveGray,
                     fontSize = 13.6.sp,
                 )
@@ -171,9 +188,9 @@ private fun StressAlert() {
 private fun RoutinesCard(state: HabitsState, viewModel: HabitsViewModel) {
     MindCard(padding = PaddingValues(32.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("Progreso Diario", color = MineShaft, fontSize = 15.2.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.habits_daily_progress), color = MineShaft, fontSize = 15.2.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
             Text(
-                "${(state.progress * 100).toInt()}% Completado (${state.completedCount}/${state.activeHabits.size})",
+                stringResource(R.string.habits_progress_format, (state.progress * 100).toInt(), state.completedCount, state.activeHabits.size),
                 color = CornflowerBlue,
                 fontSize = 15.2.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -193,7 +210,7 @@ private fun RoutinesCard(state: HabitsState, viewModel: HabitsViewModel) {
             )
         }
         Text(
-            "Añadir Nuevo Hábito",
+            stringResource(R.string.habits_add_new),
             color = MineShaft,
             fontSize = 17.6.sp,
             fontWeight = FontWeight.Bold,
@@ -206,7 +223,7 @@ private fun RoutinesCard(state: HabitsState, viewModel: HabitsViewModel) {
             MindFlowInput(
                 value = state.newName,
                 onValueChange = viewModel::onNewNameChange,
-                placeholder = "Ej. Leer 10 páginas antes de dormir...",
+                placeholder = stringResource(R.string.habits_new_placeholder),
                 background = White,
                 fontSize = 14.4.sp,
                 contentPadding = PaddingValues(horizontal = 17.dp, vertical = 13.dp),
@@ -224,7 +241,7 @@ private fun RoutinesCard(state: HabitsState, viewModel: HabitsViewModel) {
                 minWidth = 112.dp,
             )
             SolidButton(
-                text = "+ Crear",
+                text = stringResource(R.string.common_create),
                 onClick = viewModel::create,
                 background = Downy,
                 fontSize = 14.4.sp,
@@ -242,18 +259,19 @@ private fun RoutinesCard(state: HabitsState, viewModel: HabitsViewModel) {
             MindFlowInput(
                 value = state.filter,
                 onValueChange = viewModel::onFilterChange,
-                placeholder = "Filtrar tus hábitos...",
+                placeholder = stringResource(R.string.habits_filter_placeholder),
                 fontSize = 13.6.sp,
                 shape = RoundedCornerShape(6.dp),
                 contentPadding = PaddingValues(horizontal = 13.8.dp, vertical = 7.4.dp),
                 leading = { Text("🔍", color = Gray, fontSize = 12.8.sp) },
                 modifier = Modifier.weight(1f),
             )
+            val statusLabel = stringResource(R.string.journal_sentiment_filter, state.statusFilter.displayLabel())
             Dropdown(
                 value = state.statusFilter,
                 options = HabitStatusFilter.entries,
                 onSelect = viewModel::onStatusFilterChange,
-                label = { "Estado: ${it.label}" },
+                label = { statusLabel },
                 radius = 6.dp,
                 padding = PaddingValues(start = 17.8.dp, end = 12.dp, top = 7.4.dp, bottom = 7.4.dp),
                 textColor = Gray,
@@ -270,14 +288,14 @@ private fun HabitsTable(state: HabitsState, onToggle: (Habit) -> Unit) {
     val rowDivider = CatskillWhite
     Column(Modifier.horizontalScroll(rememberScrollState())) {
         Row(Modifier.drawBehind { drawLine(headerUnderline, Offset(0f, size.height), Offset(size.width, size.height), 1.dp.toPx()) }) {
-            HeaderCell("Estado", ColStatus)
-            HeaderCell("Hábito", ColName)
-            HeaderCell("Categoría", ColCategory)
-            HeaderCell("Racha Actual", ColStreak)
+            HeaderCell(stringResource(R.string.habits_col_status), ColStatus)
+            HeaderCell(stringResource(R.string.habits_col_name), ColName)
+            HeaderCell(stringResource(R.string.habits_col_category), ColCategory)
+            HeaderCell(stringResource(R.string.habits_col_streak), ColStreak)
         }
         if (state.visibleHabits.isEmpty()) {
             Text(
-                "No hay hábitos con este filtro.",
+                stringResource(R.string.habits_empty_filtered),
                 color = Gray,
                 fontSize = 13.6.sp,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 16.dp),
@@ -327,9 +345,9 @@ private fun HabitsTable(state: HabitsState, onToggle: (Habit) -> Unit) {
                 }
                 Box(Modifier.width(ColStreak).padding(horizontal = 8.dp)) {
                     when {
-                        paused -> Text("Pausado por IA", color = Zest, fontSize = 12.8.sp)
+                        paused -> Text(stringResource(R.string.habits_paused_by_ai), color = Zest, fontSize = 12.8.sp)
                         habit.streak > 0 -> Tag(
-                            "🔥 ${habit.streak} ${if (habit.streak == 1) "día" else "días"}",
+                            "🔥 " + pluralStringResource(R.plurals.days_count, habit.streak, habit.streak),
                             background = Serenade,
                             contentColor = Zest,
                             fontSize = 13.6.sp,
@@ -338,7 +356,7 @@ private fun HabitsTable(state: HabitsState, onToggle: (Habit) -> Unit) {
                             contentPadding = PaddingValues(horizontal = 9.6.dp, vertical = 4.8.dp),
                         )
                         else -> Tag(
-                            "0 días",
+                            pluralStringResource(R.plurals.days_count, 0, 0),
                             contentColor = Gray,
                             fontSize = 13.6.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -408,15 +426,14 @@ private fun <T> Dropdown(
 @Composable
 private fun SuggestionsCard(state: HabitsState, onAdd: (HabitSuggestion) -> Unit) {
     MindCard(padding = PaddingValues(32.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("Sugerencias de IA", color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.habits_ai_suggestions_title), color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.Bold)
         Text(
-            if (state.stressDetected) "Basado en tus registros recientes, te recomendamos rutinas que reduzcan el estrés."
-            else "Rutinas recomendadas por MindFlow AI para complementar tu bienestar.",
+            stringResource(if (state.stressDetected) R.string.habits_suggestions_stressed else R.string.habits_suggestions_normal),
             color = Gray,
             fontSize = 13.6.sp,
         )
         if (state.suggestions.isEmpty()) {
-            Text("Ya añadiste todas las sugerencias disponibles.", color = Gray, fontSize = 13.6.sp)
+            Text(stringResource(R.string.habits_suggestions_all_added), color = Gray, fontSize = 13.6.sp)
         }
         state.suggestions.forEachIndexed { index, suggestion ->
             if (index > 0) HorizontalDivider(color = CatskillWhite)
@@ -434,7 +451,7 @@ private fun SuggestionsCard(state: HabitsState, onAdd: (HabitSuggestion) -> Unit
                     Text(suggestion.reason, color = Gray, fontSize = 12.8.sp)
                 }
                 SolidButton(
-                    text = "+ Añadir",
+                    text = stringResource(R.string.common_add),
                     onClick = { onAdd(suggestion) },
                     background = Downy,
                     radius = 8.dp,
@@ -448,9 +465,9 @@ private fun SuggestionsCard(state: HabitsState, onAdd: (HabitSuggestion) -> Unit
 @Composable
 private fun HistoryCard(history: List<HabitLog>) {
     MindCard(padding = PaddingValues(32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Historial", color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.habits_history_title), color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.Bold)
         if (history.isEmpty()) {
-            Text("Todavía no has completado hábitos. Márcalos en Mis Rutinas.", color = Gray, fontSize = 13.6.sp)
+            Text(stringResource(R.string.habits_history_empty), color = Gray, fontSize = 13.6.sp)
         }
         history.forEachIndexed { index, log ->
             if (index > 0) HorizontalDivider(color = CatskillWhite)
@@ -460,7 +477,7 @@ private fun HistoryCard(history: List<HabitLog>) {
                     Text(log.habitName, color = MineShaft, fontSize = 15.2.sp, fontWeight = FontWeight.Medium)
                 }
                 Tag(
-                    "✓ Completado",
+                    stringResource(R.string.habits_completed_tag),
                     background = Downy.copy(alpha = 0.15f),
                     contentColor = Color(0xFF2E9E6B),
                     fontWeight = FontWeight.SemiBold,

@@ -39,6 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -48,8 +51,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.R
 import com.cognitech.mindflow.data.export.ReportExporter
-import com.cognitech.mindflow.ui.common.SpanishLocale
+import com.cognitech.mindflow.ui.common.displayLocale
 import com.cognitech.mindflow.ui.components.LeftAccentCard
 import com.cognitech.mindflow.ui.components.MainDestination
 import com.cognitech.mindflow.ui.components.MainScaffold
@@ -76,13 +80,13 @@ import com.cognitech.mindflow.ui.theme.White
 import com.cognitech.mindflow.ui.theme.Zest
 import java.time.format.DateTimeFormatter
 
-private val DayLabels = listOf("Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom")
+@Composable
+private fun dayLabels() = stringArrayResource(R.array.weekday_short)
 
 @Composable
 fun AnalyticsScreen(
     viewModel: AnalyticsViewModel,
     onNavigate: (MainDestination) -> Unit,
-    onLogout: () -> Unit,
 ) {
     LaunchedEffect(Unit) { viewModel.load() }
     val state = viewModel.state
@@ -102,11 +106,7 @@ fun AnalyticsScreen(
     MainScaffold(
         current = MainDestination.ANALYTICS,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu -> ScreenHeader("Analíticas y Tendencias", openMenu) },
+        header = { ScreenHeader(stringResource(R.string.analytics_title)) },
     ) {
         Box(Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) { WeeklySummaryCard(state) }
         Column(
@@ -114,9 +114,9 @@ fun AnalyticsScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                StatCard("Entradas este mes", state.monthCount.toString(), CornflowerBlue)
-                StatCard("Ánimo Promedio", state.averageMood, Downy)
-                StatCard("Mayor Racha Hábitos", "${state.bestStreak} ${if (state.bestStreak == 1) "día" else "días"}", Zest)
+                StatCard(stringResource(R.string.analytics_entries_month), state.monthCount.toString(), CornflowerBlue)
+                StatCard(stringResource(R.string.analytics_avg_mood), state.averageMood, Downy)
+                StatCard(stringResource(R.string.analytics_best_streak), pluralStringResource(R.plurals.days_count, state.bestStreak, state.bestStreak), Zest)
             }
             FluctuationCard(state)
             WordCloudCard(state.topWords)
@@ -132,15 +132,15 @@ fun AnalyticsScreen(
         AlertDialog(
             onDismissRequest = { showPremiumDialog = false },
             containerColor = White,
-            title = { Text("⭐ Función Premium", color = Portage, fontWeight = FontWeight.Bold) },
-            text = { Text("La exportación de reportes clínicos en PDF y CSV requiere MindFlow Premium.", color = MineShaft) },
+            title = { Text(stringResource(R.string.analytics_premium_title), color = Portage, fontWeight = FontWeight.Bold) },
+            text = { Text(stringResource(R.string.analytics_premium_body), color = MineShaft) },
             confirmButton = {
                 TextButton(onClick = {
                     showPremiumDialog = false
                     onNavigate(MainDestination.PLANS)
-                }) { Text("Ver Planes", color = Portage) }
+                }) { Text(stringResource(R.string.analytics_view_plans), color = Portage) }
             },
-            dismissButton = { TextButton(onClick = { showPremiumDialog = false }) { Text("Cerrar", color = Gray) } },
+            dismissButton = { TextButton(onClick = { showPremiumDialog = false }) { Text(stringResource(R.string.common_close), color = Gray) } },
         )
     }
 }
@@ -148,7 +148,7 @@ fun AnalyticsScreen(
 @Composable
 private fun WeeklySummaryCard(state: AnalyticsState) {
     val shape = RoundedCornerShape(24.dp)
-    val range = DateTimeFormatter.ofPattern("d MMM", SpanishLocale)
+    val range = DateTimeFormatter.ofPattern("d MMM", displayLocale())
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -158,7 +158,7 @@ private fun WeeklySummaryCard(state: AnalyticsState) {
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Resumen Semanal", color = Gray800, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 20.sp, modifier = Modifier.weight(1f))
+            Text(stringResource(R.string.analytics_weekly_summary), color = Gray800, fontSize = 14.sp, fontWeight = FontWeight.SemiBold, lineHeight = 20.sp, modifier = Modifier.weight(1f))
             Text(
                 "${range.format(state.weekStart)} - ${range.format(state.weekStart.plusDays(6))}".replace(".", ""),
                 color = Gray500,
@@ -176,11 +176,11 @@ private fun WeeklySummaryCard(state: AnalyticsState) {
                 Text(state.positivity?.let { "$it%" } ?: "--", color = Downy, fontSize = 18.sp, fontWeight = FontWeight.Bold, lineHeight = 28.sp)
             }
             Row(Modifier.weight(1f)) {
-                Text("Positividad General", color = Gray800, fontSize = 14.sp, fontWeight = FontWeight.Medium, lineHeight = 20.sp, modifier = Modifier.weight(1f))
+                Text(stringResource(R.string.analytics_overall_positivity), color = Gray800, fontSize = 14.sp, fontWeight = FontWeight.Medium, lineHeight = 20.sp, modifier = Modifier.weight(1f))
                 Text(
                     when (val d = state.positivityDelta) {
-                        null -> "Sin datos de la semana pasada"
-                        else -> "${if (d >= 0) "+" else ""}$d% desde la semana pasada"
+                        null -> stringResource(R.string.analytics_no_last_week_data)
+                        else -> stringResource(R.string.analytics_delta_from_last_week, if (d >= 0) "+" else "", d)
                     },
                     color = Gray500,
                     fontSize = 12.sp,
@@ -205,7 +205,7 @@ private fun WeeklySummaryCard(state: AnalyticsState) {
 private fun StatCard(label: String, value: String, accent: Color) {
     LeftAccentCard(accent = accent, modifier = Modifier.shadow(2.dp, RoundedCornerShape(12.dp), ambientColor = Color.Black.copy(0.04f), spotColor = Color.Black.copy(0.04f))) {
         Text(
-            label.uppercase(SpanishLocale),
+            label.uppercase(displayLocale()),
             color = Gray,
             fontSize = 13.6.sp,
             fontWeight = FontWeight.Bold,
@@ -222,7 +222,7 @@ private fun FluctuationCard(state: AnalyticsState) {
         padding = PaddingValues(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 74.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Text("Fluctuación Emocional (Última Semana)", color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.analytics_fluctuation_title), color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
         val baselineColor = CatskillWhite
         Row(
             modifier = Modifier
@@ -236,7 +236,7 @@ private fun FluctuationCard(state: AnalyticsState) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
-            DayLabels.forEachIndexed { i, label ->
+            dayLabels().forEachIndexed { i, label ->
                 val score = state.weekScores[i]
                 Column(
                     modifier = Modifier.weight(1f).fillMaxHeight(),
@@ -273,7 +273,7 @@ private fun WordCloudCard(words: List<String>) {
         WordSlot(35.dp, 150.dp, 14.sp, false, Gray400),
     )
     MindCard(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("Nube de palabras frecuentes", color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.analytics_word_cloud_title), color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
         BoxWithConstraints(
             Modifier
                 .fillMaxWidth()
@@ -283,7 +283,7 @@ private fun WordCloudCard(words: List<String>) {
             val scale = (maxWidth / 302.dp).coerceAtMost(1.2f)
             if (words.isEmpty()) {
                 Text(
-                    "Escribe algunos registros para descubrir tus palabras más frecuentes.",
+                    stringResource(R.string.analytics_word_cloud_empty),
                     color = Gray,
                     fontSize = 13.6.sp,
                     textAlign = TextAlign.Center,
@@ -310,6 +310,7 @@ private fun TrendCard(scores: List<Float?>) {
     val measurer = rememberTextMeasurer()
     val labelStyle = TextStyle(color = Gray500, fontSize = 12.sp, fontWeight = FontWeight.Medium, fontFamily = Inter)
     val gridLineColor = Gray100
+    val trendDayLabels = dayLabels()
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -319,7 +320,7 @@ private fun TrendCard(scores: List<Float?>) {
         verticalArrangement = Arrangement.spacedBy(32.dp),
     ) {
         Text(
-            "Tendencias de Ánimo",
+            stringResource(R.string.analytics_mood_trends_title),
             color = Gray800,
             fontSize = 20.sp,
             fontWeight = FontWeight.SemiBold,
@@ -343,7 +344,7 @@ private fun TrendCard(scores: List<Float?>) {
                     val text = measurer.measure(v.toString(), labelStyle)
                     drawText(text, topLeft = Offset(left - text.size.width - 6.dp.toPx(), y - text.size.height / 2))
                 }
-                DayLabels.forEachIndexed { i, label ->
+                trendDayLabels.forEachIndexed { i, label ->
                     val text = measurer.measure(label, labelStyle)
                     drawText(text, topLeft = Offset(left + stepX * i - text.size.width / 2, bottom + 6.dp.toPx()))
                 }
@@ -371,7 +372,7 @@ private fun TrendCard(scores: List<Float?>) {
                 points.forEach { drawCircle(CornflowerBlue, radius = 3.5.dp.toPx(), center = it) }
             }
             if (scores.all { it == null }) {
-                Text("Sin registros esta semana", color = Gray, fontSize = 13.6.sp, modifier = Modifier.align(Alignment.Center))
+                Text(stringResource(R.string.analytics_no_entries_week), color = Gray, fontSize = 13.6.sp, modifier = Modifier.align(Alignment.Center))
             }
         }
     }
@@ -388,15 +389,15 @@ private fun ExportCard(onPdf: () -> Unit, onCsv: () -> Unit) {
             .padding(25.dp),
         verticalArrangement = Arrangement.spacedBy(8.6.dp),
     ) {
-        Text("⭐ Exportar Reportes Clínicos", color = Portage, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.analytics_export_title), color = Portage, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
         Text(
-            "Descarga tu historial estructurado con gráficas para compartirlo formalmente con tu psicólogo (Requiere Premium).",
+            stringResource(R.string.analytics_export_body),
             color = Gray,
             fontSize = 13.6.sp,
         )
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.padding(start = 10.dp, top = 4.dp)) {
-            ExportButton("Exportar PDF", onPdf)
-            ExportButton("Exportar CSV", onCsv)
+            ExportButton(stringResource(R.string.analytics_export_pdf), onPdf)
+            ExportButton(stringResource(R.string.analytics_export_csv), onCsv)
         }
     }
 }

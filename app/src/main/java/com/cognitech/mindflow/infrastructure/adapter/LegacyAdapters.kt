@@ -22,7 +22,6 @@ class SqliteUserAdapter(private val source: AuthRepository) : UserRepository {
     override suspend fun signIn(email: String, password: String) = source.signIn(email, password).map(::user)
     override suspend fun currentUser() = source.currentUser()?.let(::user)
     override suspend fun updateProfile(userId: Long, name: String, occupation: String, timezone: String) { source.updateProfile(userId, name, occupation, timezone) }
-    override suspend fun setPlan(userId: Long, plan: String) { source.setPlan(userId, plan) }
     override suspend fun deleteAccount(userId: Long) { source.deleteAccount(userId) }
 }
 class SqliteJournalAdapter(private val source: JournalRepository) : com.cognitech.mindflow.domain.port.JournalRepository {

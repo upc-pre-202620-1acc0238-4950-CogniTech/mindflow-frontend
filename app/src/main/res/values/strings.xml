@@ -1,3 +1,270 @@
 <resources>
     <string name="app_name">MindFlow</string>
+
+    <!-- Común -->
+    <string name="common_all">"Todos"</string>
+    <string name="common_cancel">"Cancelar"</string>
+    <string name="common_close">"Cerrar"</string>
+    <string name="common_continue">"Continuar"</string>
+    <string name="common_create">"+ Crear"</string>
+    <string name="common_delete">"Eliminar"</string>
+    <string name="common_add">"+ Añadir"</string>
+    <string name="common_google_not_available">"El acceso con Google estará disponible pronto"</string>
+    <string name="common_hide_password">"Ocultar contraseña"</string>
+    <string name="common_show_password">"Mostrar contraseña"</string>
+    <string name="common_preparing">"Preparando…"</string>
+    <string name="common_send">"Enviar"</string>
+    <string name="common_understood">"Entendido"</string>
+    <string name="common_user_fallback">"Usuario"</string>
+
+    <!-- Navegación inferior -->
+    <string name="nav_home">"Dashboard"</string>
+    <string name="nav_journal">"Diario (Journal)"</string>
+    <string name="nav_habits">"Hábitos"</string>
+    <string name="nav_analytics">"Analíticas"</string>
+    <string name="nav_profile">"Configuración"</string>
+    <string name="nav_plans">"Planes"</string>
+
+    <plurals name="days_count">
+        <item quantity="one">"%1$d día"</item>
+        <item quantity="other">"%1$d días"</item>
+    </plurals>
+
+    <string-array name="weekday_initials">
+        <item>"L"</item>
+        <item>"M"</item>
+        <item>"X"</item>
+        <item>"J"</item>
+        <item>"V"</item>
+        <item>"S"</item>
+        <item>"D"</item>
+    </string-array>
+
+    <string-array name="weekday_short">
+        <item>"Lun"</item>
+        <item>"Mar"</item>
+        <item>"Mié"</item>
+        <item>"Jue"</item>
+        <item>"Vie"</item>
+        <item>"Sáb"</item>
+        <item>"Dom"</item>
+    </string-array>
+
+    <!-- Home -->
+    <string name="home_greeting">"Hola, %1$s"</string>
+    <string name="home_subtitle">"%1$s - Tu IA está lista para escucharte."</string>
+    <string name="home_mood_question">"¿Cómo te sientes en este momento?"</string>
+    <string name="home_ai_active">"MindFlow AI Activa"</string>
+    <string name="home_mood_placeholder">"Escribe aquí tus pensamientos. Este es un espacio seguro y encriptado…"</string>
+    <string name="home_save_entry">"Guardar Registro"</string>
+    <string name="home_ai_card_label">"✨ MindFlow AI"</string>
+    <string name="home_ai_fallback">"Hola, estoy aquí para escucharte. Cuéntame cómo te sientes hoy y te daré una respuesta personalizada."</string>
+    <string name="home_recent_conversations">"Conversaciones Recientes"</string>
+    <string name="home_view_recent_only">"Ver solo las recientes"</string>
+    <string name="home_view_full_history">"Ver historial completo de conversaciones"</string>
+    <string name="home_no_entries">"Aún no tienes registros. Escribe cómo te sientes para empezar."</string>
+    <string name="home_quick_interventions">"Intervenciones Rápidas"</string>
+    <string name="home_breathing">"Respiración 4-7-8"</string>
+    <string name="home_micro_meditation">"Micro-meditación (3 min)"</string>
+    <string name="home_daily_habits">"Hábitos Diarios"</string>
+    <string name="home_weekly_mood_summary">"Resumen Semanal de Ánimo"</string>
+    <string name="home_view_full_report">"Ver Reporte Completo"</string>
+
+    <!-- Journal -->
+    <string name="journal_empty_global">"Aún no tienes registros. Escribe tu primer pensamiento desde el Dashboard."</string>
+    <string name="journal_empty_filtered">"No hay registros que coincidan con los filtros."</string>
+    <string name="journal_title">"Tu Historial Emocional"</string>
+    <string name="journal_search_placeholder">"Buscar en la plataforma..."</string>
+    <string name="journal_search_placeholder_card">"Buscar en tus pensamientos..."</string>
+    <string name="journal_prev_month">"Ver Mes Anterior"</string>
+    <string name="journal_current_month">"Ver Mes Actual"</string>
+    <string name="journal_legend_positive">"● Positivo"</string>
+    <string name="journal_legend_neutral">"● Neutral"</string>
+    <string name="journal_legend_negative">"● Negativo"</string>
+    <string name="journal_sentiment_filter">"Estado: %1$s"</string>
+    <string name="journal_pick_date">"Elegir fecha"</string>
+
+    <!-- Habits -->
+    <string name="habits_title">"Hábitos"</string>
+    <string name="habits_tab_routines">"Mis Rutinas"</string>
+    <string name="habits_tab_suggestions">"Sugerencias de IA"</string>
+    <string name="habits_tab_history">"Historial"</string>
+    <string name="habits_status_completed">"Completados"</string>
+    <string name="habits_status_pending">"Pendientes"</string>
+    <string name="habits_status_paused">"Pausados"</string>
+    <string name="habits_stress_alert_title">"MindFlow AI detecta niveles de estrés por encima del promedio."</string>
+    <string name="habits_stress_alert_body">"Hemos pausado tus tareas de alta exigencia cognitiva automáticamente. Prioriza hoy tu bienestar y descanso."</string>
+    <string name="habits_daily_progress">"Progreso Diario"</string>
+    <string name="habits_progress_format">"%1$d%% Completado (%2$d/%3$d)"</string>
+    <string name="habits_add_new">"Añadir Nuevo Hábito"</string>
+    <string name="habits_new_placeholder">"Ej. Leer 10 páginas antes de dormir..."</string>
+    <string name="habits_filter_placeholder">"Filtrar tus hábitos..."</string>
+    <string name="habits_col_status">"Estado"</string>
+    <string name="habits_col_name">"Hábito"</string>
+    <string name="habits_col_category">"Categoría"</string>
+    <string name="habits_col_streak">"Racha Actual"</string>
+    <string name="habits_empty_filtered">"No hay hábitos con este filtro."</string>
+    <string name="habits_paused_by_ai">"Pausado por IA"</string>
+    <string name="habits_ai_suggestions_title">"Sugerencias de IA"</string>
+    <string name="habits_suggestions_stressed">"Basado en tus registros recientes, te recomendamos rutinas que reduzcan el estrés."</string>
+    <string name="habits_suggestions_normal">"Rutinas recomendadas por MindFlow AI para complementar tu bienestar."</string>
+    <string name="habits_suggestions_all_added">"Ya añadiste todas las sugerencias disponibles."</string>
+    <string name="habits_history_title">"Historial"</string>
+    <string name="habits_history_empty">"Todavía no has completado hábitos. Márcalos en Mis Rutinas."</string>
+    <string name="habits_completed_tag">"✓ Completado"</string>
+
+    <!-- Analytics -->
+    <string name="analytics_title">"Analíticas y Tendencias"</string>
+    <string name="analytics_entries_month">"Entradas este mes"</string>
+    <string name="analytics_avg_mood">"Ánimo Promedio"</string>
+    <string name="analytics_best_streak">"Mayor Racha Hábitos"</string>
+    <string name="analytics_premium_title">"⭐ Función Premium"</string>
+    <string name="analytics_premium_body">"La exportación de reportes clínicos en PDF y CSV requiere MindFlow Premium."</string>
+    <string name="analytics_view_plans">"Ver Planes"</string>
+    <string name="analytics_weekly_summary">"Resumen Semanal"</string>
+    <string name="analytics_overall_positivity">"Positividad General"</string>
+    <string name="analytics_no_last_week_data">"Sin datos de la semana pasada"</string>
+    <string name="analytics_delta_from_last_week">"%1$s%2$d%% desde la semana pasada"</string>
+    <string name="analytics_fluctuation_title">"Fluctuación Emocional (Última Semana)"</string>
+    <string name="analytics_word_cloud_title">"Nube de palabras frecuentes"</string>
+    <string name="analytics_word_cloud_empty">"Escribe algunos registros para descubrir tus palabras más frecuentes."</string>
+    <string name="analytics_mood_trends_title">"Tendencias de Ánimo"</string>
+    <string name="analytics_no_entries_week">"Sin registros esta semana"</string>
+    <string name="analytics_export_title">"⭐ Exportar Reportes Clínicos"</string>
+    <string name="analytics_export_body">"Descarga tu historial estructurado con gráficas para compartirlo formalmente con tu psicólogo (Requiere Premium)."</string>
+    <string name="analytics_export_pdf">"Exportar PDF"</string>
+    <string name="analytics_export_csv">"Exportar CSV"</string>
+
+    <!-- Settings -->
+    <string name="settings_title">"Ajustes y Privacidad"</string>
+    <string name="settings_saved_toast">"Cambios guardados"</string>
+    <string name="settings_avatar_hint">"Tu avatar usa tu inicial y los colores de MindFlow"</string>
+    <string name="settings_logout">"Cerrar sesión"</string>
+    <string name="settings_support_title">"Soporte Técnico"</string>
+    <string name="settings_generate_ticket">"Generar Ticket de Ayuda"</string>
+    <string name="settings_faq">"Centro de Preguntas (FAQ)"</string>
+    <string name="settings_danger_zone">"Zona de Peligro"</string>
+    <string name="settings_delete_account_body">"Eliminar tu cuenta purgará permanentemente todos tus registros encriptados."</string>
+    <string name="settings_delete_account">"Eliminar mi cuenta"</string>
+    <string name="settings_ticket_generated">"Ticket #%d generado. Te contactaremos por correo."</string>
+    <string name="settings_delete_confirm_title">"¿Eliminar tu cuenta?"</string>
+    <string name="settings_delete_confirm_body">"Se borrarán tu perfil, tus registros del diario y tus hábitos de este dispositivo. Esta acción no se puede deshacer."</string>
+    <string name="settings_change_avatar">"Cambiar Avatar"</string>
+    <string name="settings_full_name">"Nombre Completo"</string>
+    <string name="settings_email">"Correo Electrónico"</string>
+    <string name="settings_occupation">"Ocupación"</string>
+    <string name="settings_occupation_placeholder">"Ej. Estudiante Universitario"</string>
+    <string name="settings_timezone">"Zona Horaria"</string>
+    <string name="settings_save_changes">"Guardar Cambios"</string>
+    <string name="settings_privacy_title">"Privacidad y Experiencia"</string>
+    <string name="settings_pin_lock">"Bloqueo por PIN (AES-256)"</string>
+    <string name="settings_pin_lock_desc">"Solicitar código de 4 dígitos al abrir la app."</string>
+    <string name="settings_dark_mode">"Modo Oscuro"</string>
+    <string name="settings_dark_mode_desc">"Ideal para registrar emociones en la noche."</string>
+    <string name="settings_reminders">"Recordatorios de Hábitos"</string>
+    <string name="settings_reminders_desc">"Notificaciones push para hidratación y pausas."</string>
+    <string name="settings_language">"Idioma"</string>
+    <string name="settings_language_desc">"Elige el idioma de la aplicación."</string>
+    <string name="settings_subscription_title">"Suscripción"</string>
+    <string name="settings_current_plan">"Plan Actual: "</string>
+    <string name="settings_feature_mood_journal">"IA Mood Journal"</string>
+    <string name="settings_feature_habit_manager">"Gestor de Hábitos"</string>
+    <string name="settings_feature_pdf_export">"Exportación a PDF"</string>
+    <string name="settings_feature_clinical_reports">"Reportes Clínicos"</string>
+    <string name="settings_manage_plan">"Gestionar Plan"</string>
+    <string name="settings_upgrade_premium">"Mejorar a Premium"</string>
+    <string name="settings_ticket_placeholder">"Describe el problema que tienes..."</string>
+    <string name="settings_faq_q1">"¿Mis registros son privados?"</string>
+    <string name="settings_faq_a1">"Sí. Tus registros se guardan cifrados y solo tú puedes verlos."</string>
+    <string name="settings_faq_q2">"¿Cómo funciona MindFlow AI?"</string>
+    <string name="settings_faq_a2">"Analiza el tono de lo que escribes para darte una respuesta empática y sugerencias de bienestar."</string>
+    <string name="settings_faq_q3">"¿Por qué se pausaron mis hábitos?"</string>
+    <string name="settings_faq_a3">"Cuando la IA detecta estrés alto, pausa las tareas de alta exigencia para que priorices tu descanso."</string>
+    <string name="settings_faq_q4">"¿Qué incluye Premium?"</string>
+    <string name="settings_faq_a4">"Exportación de reportes clínicos en PDF y CSV, analíticas avanzadas y soporte prioritario."</string>
+
+    <!-- Plans -->
+    <string name="plans_title">"Planes"</string>
+    <string name="plans_headline">"Invierte en tu bienestar emocional"</string>
+    <string name="plans_subheadline">"Elige el plan que mejor se adapte a tu ritmo. Demócrata e inteligente, MindFlow te acompaña en cada paso hacia tu calma mental."</string>
+    <string name="plans_downgrade_toast">"El cambio de plan se confirma desde el portal de pagos."</string>
+    <string name="plans_stripe_disclosure">"Pagos encriptados y procesados de forma segura a través de Stripe."</string>
+    <string name="plans_checkout_disclaimer">"Se abrirá Stripe en modo prueba para activar MindFlow Premium por $4.99 / mes. No se realizará ningún cobro real."</string>
+    <string name="plans_freemium_tagline">"Todo lo necesario para empezar a construir autoconocimiento."</string>
+    <string name="plans_feature_mood_journal">" Diario interactivo con NLP"</string>
+    <string name="plans_feature_habit_tracker">" Ajuste basado en estrés"</string>
+    <string name="plans_feature_interventions">" Guías de respiración y meditación"</string>
+    <string name="plans_feature_basic_analytics_bold">"Analíticas Básicas:"</string>
+    <string name="plans_feature_basic_analytics_rest">" Calendario y Word Cloud"</string>
+    <string name="plans_feature_pdf_export">"Exportación de Reportes PDF"</string>
+    <string name="plans_feature_csv_export">"Exportación de Datos CSV"</string>
+    <string name="plans_current_plan">"Tu Plan Actual"</string>
+    <string name="plans_back_to_freemium">"Volver a Freemium"</string>
+    <string name="plans_premium_tagline">"Para quienes buscan un análisis profundo y acompañamiento profesional."</string>
+    <string name="plans_feature_all_freemium">"Todo lo incluido en Freemium"</string>
+    <string name="plans_feature_pdf_bold">"Exportación PDF:"</string>
+    <string name="plans_feature_pdf_detail">" Descarga historiales clínicos estructurados para tu psicólogo."</string>
+    <string name="plans_feature_csv_bold">"Exportación CSV:"</string>
+    <string name="plans_feature_csv_detail">" Accede a tus datos en bruto para análisis personal en Excel."</string>
+    <string name="plans_feature_advanced_analytics_bold">"Analíticas Avanzadas:"</string>
+    <string name="plans_feature_advanced_analytics_rest">" Gráficos detallados de fluctuación emocional."</string>
+    <string name="plans_feature_priority_support_bold">"Soporte Prioritario:"</string>
+    <string name="plans_feature_priority_support_rest">" Resolución de dudas técnicas."</string>
+    <string name="plans_upgrade_to_premium">"Actualizar a Premium"</string>
+    <string name="plans_recommended">"RECOMENDADO"</string>
+    <string name="plans_per_month">" / mes"</string>
+
+    <!-- Login -->
+    <string name="login_welcome_back">"Bienvenido de nuevo"</string>
+    <string name="login_subtitle">"Tu espacio seguro para la reflexión y el crecimiento personal."</string>
+    <string name="login_google">"Iniciar sesión con Google"</string>
+    <string name="login_or_email">"o ingresa con tu correo"</string>
+    <string name="login_password">"Contraseña"</string>
+    <string name="login_forgot_password">"¿Olvidaste tu contraseña?"</string>
+    <string name="login_submit">"Ingresar a MindFlow"</string>
+    <string name="login_no_account">"¿Aún no tienes una cuenta? "</string>
+    <string name="login_register_free">"Regístrate gratis"</string>
+    <string name="login_recover_password">"Recuperar contraseña"</string>
+    <string name="login_recover_password_body">"La recuperación de contraseña por correo estará disponible cuando la app se conecte al servidor de MindFlow."</string>
+    <string name="login_testimonial_headline">"Retoma el control de tu calma interior."</string>
+    <string name="login_testimonial_quote">"\"MindFlow no solo es un diario, es como tener un asistente emocional. La retroalimentación de la IA me ha ayudado a reducir mis picos de ansiedad durante los cierres de proyecto.\""</string>
+
+    <!-- Register -->
+    <string name="register_title">"Crea tu cuenta gratis"</string>
+    <string name="register_subtitle">"Únete a la plataforma que democratiza el acceso a herramientas de bienestar emocional con IA."</string>
+    <string name="register_google">"Registrarse con Google"</string>
+    <string name="register_or_email">"o usar correo electrónico"</string>
+    <string name="register_name_placeholder">"Ej. Alex Developer"</string>
+    <string name="register_password_label">"Crea una contraseña"</string>
+    <string name="register_password_placeholder">"Mínimo 8 caracteres"</string>
+    <string name="register_terms_prefix">"Al registrarte, aceptas nuestros "</string>
+    <string name="register_terms_of_service">"Términos de Servicio"</string>
+    <string name="register_terms_and">" y "</string>
+    <string name="register_privacy_policy">"Política de Privacidad"</string>
+    <string name="register_terms_suffix">" (Datos encriptados con AES-256)."</string>
+    <string name="register_submit">"Crear mi cuenta"</string>
+    <string name="register_has_account">"¿Ya tienes una cuenta? "</string>
+    <string name="register_login_here">"Inicia sesión aquí"</string>
+    <string name="register_features_headline">"Empodera tu mente.\nTransforma tus días."</string>
+    <string name="register_feature_mood_journal">"Procesamos tus registros para ofrecerte contención empática y validación en tiempo real."</string>
+    <string name="register_feature_habit_tracker">"Un gestor de tareas que entiende tu nivel de estrés y ajusta la exigencia para evitar el burnout."</string>
+    <string name="register_feature_interventions">"Recibe sugerencias automáticas de micro-meditaciones y pausas justo cuando más lo necesitas."</string>
+
+    <!-- Chat -->
+    <string name="chat_close">"Cerrar chat"</string>
+    <string name="chat_open">"Abrir chat con MindFlow AI"</string>
+    <string name="chat_subtitle">"Tu espacio seguro para conversar"</string>
+    <string name="chat_typing">"Escribiendo…"</string>
+    <string name="chat_placeholder">"Escribe un mensaje…"</string>
+
+    <!-- Intervenciones -->
+    <string name="intervention_prepare">"Prepárate..."</string>
+    <string name="intervention_inhale">"Inhala"</string>
+    <string name="intervention_hold">"Sostén"</string>
+    <string name="intervention_exhale">"Exhala"</string>
+    <string name="intervention_meditation_step1">"Cierra los ojos y lleva la atención a tu respiración."</string>
+    <string name="intervention_meditation_step2">"Nota las sensaciones de tu cuerpo, sin juzgarlas."</string>
+    <string name="intervention_meditation_step3">"Si aparece un pensamiento, obsérvalo y déjalo pasar."</string>
+    <string name="intervention_finished">"¡Bien hecho! Tómate un momento antes de continuar."</string>
+    <string name="intervention_end">"Terminar"</string>
 </resources>

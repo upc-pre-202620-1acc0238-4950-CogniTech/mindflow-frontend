@@ -24,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.R
 import com.cognitech.mindflow.ui.theme.CornflowerBlue
 import com.cognitech.mindflow.ui.theme.Gray
 import com.cognitech.mindflow.ui.theme.MindGradient
@@ -40,7 +42,18 @@ enum class Intervention { BREATHING_478, MICRO_MEDITATION }
 /** Guía de respiración 4-7-8 (4 ciclos) o micro-meditación de 3 minutos. */
 @Composable
 fun InterventionDialog(type: Intervention, onDismiss: () -> Unit) {
-    var phase by remember { mutableStateOf("Prepárate...") }
+    val prepareLabel = stringResource(R.string.intervention_prepare)
+    val inhaleLabel = stringResource(R.string.intervention_inhale)
+    val holdLabel = stringResource(R.string.intervention_hold)
+    val exhaleLabel = stringResource(R.string.intervention_exhale)
+    val meditationSteps = listOf(
+        stringResource(R.string.intervention_meditation_step1),
+        stringResource(R.string.intervention_meditation_step2),
+        stringResource(R.string.intervention_meditation_step3),
+    )
+    val finishedLabel = stringResource(R.string.intervention_finished)
+
+    var phase by remember { mutableStateOf(prepareLabel) }
     var secondsLeft by remember { mutableIntStateOf(0) }
     var expanded by remember { mutableStateOf(false) }
     var finished by remember { mutableStateOf(false) }
@@ -54,7 +67,7 @@ fun InterventionDialog(type: Intervention, onDismiss: () -> Unit) {
         delay(1000)
         when (type) {
             Intervention.BREATHING_478 -> repeat(4) {
-                listOf(Triple("Inhala", 4, true), Triple("Sostén", 7, true), Triple("Exhala", 8, false)).forEach { (name, secs, grow) ->
+                listOf(Triple(inhaleLabel, 4, true), Triple(holdLabel, 7, true), Triple(exhaleLabel, 8, false)).forEach { (name, secs, grow) ->
                     phase = name
                     expanded = grow
                     for (s in secs downTo 1) {
@@ -64,20 +77,15 @@ fun InterventionDialog(type: Intervention, onDismiss: () -> Unit) {
                 }
             }
             Intervention.MICRO_MEDITATION -> {
-                val steps = listOf(
-                    "Cierra los ojos y lleva la atención a tu respiración.",
-                    "Nota las sensaciones de tu cuerpo, sin juzgarlas.",
-                    "Si aparece un pensamiento, obsérvalo y déjalo pasar.",
-                )
                 expanded = true
                 for (s in 180 downTo 1) {
-                    phase = steps[(180 - s) / 60]
+                    phase = meditationSteps[(180 - s) / 60]
                     secondsLeft = s
                     delay(1000)
                 }
             }
         }
-        phase = "¡Bien hecho! Tómate un momento antes de continuar."
+        phase = finishedLabel
         secondsLeft = 0
         finished = true
     }
@@ -86,11 +94,11 @@ fun InterventionDialog(type: Intervention, onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         containerColor = White,
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(if (finished) "Cerrar" else "Terminar", color = CornflowerBlue) }
+            TextButton(onClick = onDismiss) { Text(stringResource(if (finished) R.string.common_close else R.string.intervention_end), color = CornflowerBlue) }
         },
         title = {
             Text(
-                if (type == Intervention.BREATHING_478) "Respiración 4-7-8" else "Micro-meditación (3 min)",
+                stringResource(if (type == Intervention.BREATHING_478) R.string.home_breathing else R.string.home_micro_meditation),
                 color = MineShaft,
                 fontWeight = FontWeight.Bold,
             )

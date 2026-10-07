@@ -1,6 +1,8 @@
 package com.cognitech.mindflow.ui.settings
 
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,12 +28,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.R
+import com.cognitech.mindflow.ui.components.FilterPill
 import com.cognitech.mindflow.ui.components.GradientAvatar
 import com.cognitech.mindflow.ui.components.MainDestination
 import com.cognitech.mindflow.ui.components.MainScaffold
@@ -63,47 +68,51 @@ fun SettingsScreen(
     val context = LocalContext.current
     var dialog by remember { mutableStateOf<SupportDialog?>(null) }
 
+    val savedMessage = stringResource(R.string.settings_saved_toast)
     LaunchedEffect(state.saved) {
-        if (state.saved) Toast.makeText(context, "Cambios guardados", Toast.LENGTH_SHORT).show()
+        if (state.saved) Toast.makeText(context, savedMessage, Toast.LENGTH_SHORT).show()
     }
+
+    val logout: () -> Unit = {
+        viewModel.logout()
+        onLogout()
+    }
+    val avatarHint = stringResource(R.string.settings_avatar_hint)
 
     MainScaffold(
         current = MainDestination.SETTINGS,
         onNavigate = onNavigate,
-        onLogout = {
-            viewModel.logout()
-            onLogout()
-        },
-        header = { openMenu -> ScreenHeader("Ajustes y Privacidad", openMenu) },
+        header = { ScreenHeader(stringResource(R.string.settings_title)) },
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             ProfileCard(state, viewModel) {
-                Toast.makeText(context, "Tu avatar usa tu inicial y los colores de MindFlow", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, avatarHint, Toast.LENGTH_SHORT).show()
             }
             PreferencesCard(state, viewModel)
             SubscriptionCard(isPremium = state.user?.isPremium == true, onUpgrade = { onNavigate(MainDestination.PLANS) })
+            OutlineButton(stringResource(R.string.settings_logout), onClick = logout, modifier = Modifier.fillMaxWidth())
             MindCard(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Soporte Técnico", color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
-                OutlineButton("Generar Ticket de Ayuda", onClick = { dialog = SupportDialog.TICKET }, modifier = Modifier.fillMaxWidth())
-                OutlineButton("Centro de Preguntas (FAQ)", onClick = { dialog = SupportDialog.FAQ }, modifier = Modifier.fillMaxWidth())
+                Text(stringResource(R.string.settings_support_title), color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 8.dp))
+                OutlineButton(stringResource(R.string.settings_generate_ticket), onClick = { dialog = SupportDialog.TICKET }, modifier = Modifier.fillMaxWidth())
+                OutlineButton(stringResource(R.string.settings_faq), onClick = { dialog = SupportDialog.FAQ }, modifier = Modifier.fillMaxWidth())
             }
             MindCard(
                 padding = PaddingValues(25.dp),
                 border = BorderStroke(1.dp, SunsetOrange),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                Text("Zona de Peligro", color = SunsetOrange, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.settings_danger_zone), color = SunsetOrange, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
                 Text(
-                    "Eliminar tu cuenta purgará permanentemente todos tus registros encriptados.",
+                    stringResource(R.string.settings_delete_account_body),
                     color = Gray,
                     fontSize = 12.8.sp,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
                 OutlineButton(
-                    text = "Eliminar mi cuenta",
+                    text = stringResource(R.string.settings_delete_account),
                     onClick = { dialog = SupportDialog.DELETE },
                     borderColor = SunsetOrange,
                     contentColor = SunsetOrange,
@@ -118,23 +127,26 @@ fun SettingsScreen(
     }
 
     when (dialog) {
-        SupportDialog.TICKET -> TicketDialog(onDismiss = { dialog = null }) { number ->
-            dialog = null
-            Toast.makeText(context, "Ticket #$number generado. Te contactaremos por correo.", Toast.LENGTH_LONG).show()
+        SupportDialog.TICKET -> {
+            val ticketGenerated = stringResource(R.string.settings_ticket_generated)
+            TicketDialog(onDismiss = { dialog = null }) { number ->
+                dialog = null
+                Toast.makeText(context, ticketGenerated.format(number), Toast.LENGTH_LONG).show()
+            }
         }
         SupportDialog.FAQ -> FaqDialog(onDismiss = { dialog = null })
         SupportDialog.DELETE -> AlertDialog(
             onDismissRequest = { dialog = null },
             containerColor = White,
-            title = { Text("¿Eliminar tu cuenta?", color = SunsetOrange, fontWeight = FontWeight.Bold) },
-            text = { Text("Se borrarán tu perfil, tus registros del diario y tus hábitos de este dispositivo. Esta acción no se puede deshacer.", color = MineShaft) },
+            title = { Text(stringResource(R.string.settings_delete_confirm_title), color = SunsetOrange, fontWeight = FontWeight.Bold) },
+            text = { Text(stringResource(R.string.settings_delete_confirm_body), color = MineShaft) },
             confirmButton = {
                 TextButton(onClick = {
                     dialog = null
                     viewModel.deleteAccount(onLogout)
-                }) { Text("Eliminar", color = SunsetOrange, fontWeight = FontWeight.SemiBold) }
+                }) { Text(stringResource(R.string.common_delete), color = SunsetOrange, fontWeight = FontWeight.SemiBold) }
             },
-            dismissButton = { TextButton(onClick = { dialog = null }) { Text("Cancelar", color = Gray) } },
+            dismissButton = { TextButton(onClick = { dialog = null }) { Text(stringResource(R.string.common_cancel), color = Gray) } },
         )
         null -> Unit
     }
@@ -147,20 +159,20 @@ private fun ProfileCard(state: SettingsState, viewModel: SettingsViewModel, onCh
             GradientAvatar(state.user?.initial ?: "U", size = 80.dp, fontSize = 32.sp)
             Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                 Text(state.user?.name.orEmpty(), color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
-                OutlineButton("Cambiar Avatar", onClick = onChangeAvatar)
+                OutlineButton(stringResource(R.string.settings_change_avatar), onClick = onChangeAvatar)
             }
         }
         Column(
             modifier = Modifier.padding(top = 16.dp),
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
-            ProfileField("Nombre Completo", state.name, viewModel::onNameChange)
-            ProfileField("Correo Electrónico", state.user?.email.orEmpty(), {}, enabled = false)
-            ProfileField("Ocupación", state.occupation, viewModel::onOccupationChange, placeholder = "Ej. Estudiante Universitario")
-            ProfileField("Zona Horaria", state.timezone, viewModel::onTimezoneChange)
+            ProfileField(stringResource(R.string.settings_full_name), state.name, viewModel::onNameChange)
+            ProfileField(stringResource(R.string.settings_email), state.user?.email.orEmpty(), {}, enabled = false)
+            ProfileField(stringResource(R.string.settings_occupation), state.occupation, viewModel::onOccupationChange, placeholder = stringResource(R.string.settings_occupation_placeholder))
+            ProfileField(stringResource(R.string.settings_timezone), state.timezone, viewModel::onTimezoneChange)
         }
         SolidButton(
-            text = "Guardar Cambios",
+            text = stringResource(R.string.settings_save_changes),
             onClick = viewModel::save,
             background = CornflowerBlue,
             enabled = state.name.isNotBlank(),
@@ -195,12 +207,37 @@ private fun ProfileField(
 @Composable
 private fun PreferencesCard(state: SettingsState, viewModel: SettingsViewModel) {
     MindCard {
-        Text("Privacidad y Experiencia", color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
-        PreferenceRow("Bloqueo por PIN (AES-256)", "Solicitar código de 4 dígitos al abrir la app.", state.pinLock, viewModel::onPinLockChange)
+        Text(stringResource(R.string.settings_privacy_title), color = MineShaft, fontSize = 18.7.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
+        PreferenceRow(stringResource(R.string.settings_pin_lock), stringResource(R.string.settings_pin_lock_desc), state.pinLock, viewModel::onPinLockChange)
         HorizontalDivider(color = CatskillWhite)
-        PreferenceRow("Modo Oscuro", "Ideal para registrar emociones en la noche.", state.darkMode, viewModel::onDarkModeChange)
+        PreferenceRow(stringResource(R.string.settings_dark_mode), stringResource(R.string.settings_dark_mode_desc), state.darkMode, viewModel::onDarkModeChange)
         HorizontalDivider(color = CatskillWhite)
-        PreferenceRow("Recordatorios de Hábitos", "Notificaciones push para hidratación y pausas.", state.reminders, viewModel::onRemindersChange, last = true)
+        PreferenceRow(stringResource(R.string.settings_reminders), stringResource(R.string.settings_reminders_desc), state.reminders, viewModel::onRemindersChange)
+        HorizontalDivider(color = CatskillWhite)
+        LanguageRow()
+    }
+}
+
+@Composable
+private fun LanguageRow() {
+    val current = AppCompatDelegate.getApplicationLocales()
+    val isEnglish = current.toLanguageTags().startsWith("en")
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(top = 19.2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f).padding(end = 12.dp)) {
+            Text(stringResource(R.string.settings_language), color = MineShaft, fontSize = 15.2.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.settings_language_desc), color = Gray, fontSize = 12.8.sp)
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FilterPill("ES", selected = !isEnglish) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("es"))
+            }
+            FilterPill("EN", selected = isEnglish) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
+            }
+        }
     }
 }
 
@@ -228,23 +265,23 @@ private val SubscriptionCardText = Color(0xFFCCCCCC)
 @Composable
 private fun SubscriptionCard(isPremium: Boolean, onUpgrade: () -> Unit) {
     MindCard(background = SubscriptionCardBg, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Suscripción", color = Downy, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
+        Text(stringResource(R.string.settings_subscription_title), color = Downy, fontSize = 18.7.sp, fontWeight = FontWeight.Bold)
         Text(
             buildAnnotatedString {
-                append("Plan Actual: ")
+                append(stringResource(R.string.settings_current_plan))
                 withStyle(SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) { append(if (isPremium) "Premium" else "Freemium") }
             },
             color = SubscriptionCardText,
             fontSize = 13.6.sp,
         )
         Column(Modifier.padding(top = 16.dp, bottom = 8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("✔️ IA Mood Journal", color = SubscriptionCardText, fontSize = 13.6.sp)
-            Text("✔️ Gestor de Hábitos", color = SubscriptionCardText, fontSize = 13.6.sp)
-            Text(if (isPremium) "✔️ Exportación a PDF" else "❌ Exportación a PDF", color = SubscriptionCardText.copy(alpha = if (isPremium) 1f else 0.5f), fontSize = 13.6.sp)
-            Text(if (isPremium) "✔️ Reportes Clínicos" else "❌ Reportes Clínicos", color = SubscriptionCardText.copy(alpha = if (isPremium) 1f else 0.5f), fontSize = 13.6.sp)
+            Text("✔️ " + stringResource(R.string.settings_feature_mood_journal), color = SubscriptionCardText, fontSize = 13.6.sp)
+            Text("✔️ " + stringResource(R.string.settings_feature_habit_manager), color = SubscriptionCardText, fontSize = 13.6.sp)
+            Text((if (isPremium) "✔️ " else "❌ ") + stringResource(R.string.settings_feature_pdf_export), color = SubscriptionCardText.copy(alpha = if (isPremium) 1f else 0.5f), fontSize = 13.6.sp)
+            Text((if (isPremium) "✔️ " else "❌ ") + stringResource(R.string.settings_feature_clinical_reports), color = SubscriptionCardText.copy(alpha = if (isPremium) 1f else 0.5f), fontSize = 13.6.sp)
         }
         SolidButton(
-            text = if (isPremium) "Gestionar Plan" else "Mejorar a Premium",
+            text = stringResource(if (isPremium) R.string.settings_manage_plan else R.string.settings_upgrade_premium),
             onClick = onUpgrade,
             background = Portage,
             radius = 8.dp,
@@ -260,12 +297,12 @@ private fun TicketDialog(onDismiss: () -> Unit, onSent: (Int) -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = White,
-        title = { Text("Generar Ticket de Ayuda", color = MineShaft, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.settings_generate_ticket), color = MineShaft, fontWeight = FontWeight.Bold) },
         text = {
             MindFlowInput(
                 value = text,
                 onValueChange = { text = it },
-                placeholder = "Describe el problema que tienes...",
+                placeholder = stringResource(R.string.settings_ticket_placeholder),
                 singleLine = false,
                 minHeight = 120.dp,
                 fontSize = 14.4.sp,
@@ -274,35 +311,35 @@ private fun TicketDialog(onDismiss: () -> Unit, onSent: (Int) -> Unit) {
         },
         confirmButton = {
             TextButton(onClick = { onSent((1000..9999).random()) }, enabled = text.isNotBlank()) {
-                Text("Enviar", color = CornflowerBlue, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.common_send), color = CornflowerBlue, fontWeight = FontWeight.SemiBold)
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar", color = Gray) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel), color = Gray) } },
     )
 }
 
 @Composable
 private fun FaqDialog(onDismiss: () -> Unit) {
     val faqs = listOf(
-        "¿Mis registros son privados?" to "Sí. Tus registros se guardan cifrados y solo tú puedes verlos.",
-        "¿Cómo funciona MindFlow AI?" to "Analiza el tono de lo que escribes para darte una respuesta empática y sugerencias de bienestar.",
-        "¿Por qué se pausaron mis hábitos?" to "Cuando la IA detecta estrés alto, pausa las tareas de alta exigencia para que priorices tu descanso.",
-        "¿Qué incluye Premium?" to "Exportación de reportes clínicos en PDF y CSV, analíticas avanzadas y soporte prioritario.",
+        R.string.settings_faq_q1 to R.string.settings_faq_a1,
+        R.string.settings_faq_q2 to R.string.settings_faq_a2,
+        R.string.settings_faq_q3 to R.string.settings_faq_a3,
+        R.string.settings_faq_q4 to R.string.settings_faq_a4,
     )
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = White,
-        title = { Text("Centro de Preguntas (FAQ)", color = MineShaft, fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(R.string.settings_faq), color = MineShaft, fontWeight = FontWeight.Bold) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 faqs.forEach { (q, a) ->
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(q, color = MineShaft, fontSize = 15.2.sp, fontWeight = FontWeight.SemiBold)
-                        Text(a, color = Gray, fontSize = 13.6.sp)
+                        Text(stringResource(q), color = MineShaft, fontSize = 15.2.sp, fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(a), color = Gray, fontSize = 13.6.sp)
                     }
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Cerrar", color = CornflowerBlue) } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_close), color = CornflowerBlue) } },
     )
 }

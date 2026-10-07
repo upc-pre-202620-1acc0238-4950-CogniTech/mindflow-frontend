@@ -9,16 +9,20 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Locale
 
-val SpanishLocale: Locale = Locale.forLanguageTag("es-PE")
+/** Idioma elegido por el usuario en Configuración (AppCompatDelegate ya lo aplicó a Locale.getDefault()). */
+fun displayLocale(): Locale = Locale.getDefault()
 
 fun Long.toLocalDate(): LocalDate = Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
 
-private fun String.capitalized() = replaceFirstChar { it.titlecase(SpanishLocale) }
+private fun String.capitalized(locale: Locale) = replaceFirstChar { it.titlecase(locale) }
 
-/** "Jueves, 26 de Abril" */
-fun LocalDate.longLabel(): String =
-    "${dayOfWeek.getDisplayName(TextStyle.FULL, SpanishLocale).capitalized()}, $dayOfMonth de " +
-        month.getDisplayName(TextStyle.FULL, SpanishLocale).capitalized()
+/** "Jueves, 26 de Abril" (o "Thursday, April 26" en inglés) */
+fun LocalDate.longLabel(): String {
+    val locale = displayLocale()
+    val day = dayOfWeek.getDisplayName(TextStyle.FULL, locale).capitalized(locale)
+    val monthName = month.getDisplayName(TextStyle.FULL, locale).capitalized(locale)
+    return if (locale.language == "en") "$day, $monthName $dayOfMonth" else "$day, $dayOfMonth de $monthName"
+}
 
 /** "Domingo, 26 de Abril, 3:09 AM" */
 fun Long.entryDateLabel(): String {
@@ -40,13 +44,15 @@ fun Long.relativeLabel(): String {
         date == today -> (minutes / 60).let { if (it == 1L) "Hace 1 hora" else "Hace $it horas" }
         date == today.minusDays(1) -> "Ayer, $time"
         date.isAfter(today.minusDays(7)) ->
-            date.dayOfWeek.getDisplayName(TextStyle.FULL, SpanishLocale).capitalized() + ", " + time
-        else -> "${date.dayOfMonth} ${date.month.getDisplayName(TextStyle.SHORT, SpanishLocale)}, $time"
+            date.dayOfWeek.getDisplayName(TextStyle.FULL, displayLocale()).capitalized(displayLocale()) + ", " + time
+        else -> "${date.dayOfMonth} ${date.month.getDisplayName(TextStyle.SHORT, displayLocale())}, $time"
     }
 }
 
-fun monthYearLabel(date: LocalDate): String =
-    date.month.getDisplayName(TextStyle.FULL, SpanishLocale).capitalized() + " " + date.year
+fun monthYearLabel(date: LocalDate): String {
+    val locale = displayLocale()
+    return date.month.getDisplayName(TextStyle.FULL, locale).capitalized(locale) + " " + date.year
+}
 
 /** Puntaje de ánimo: positivo 1.0, neutral 0.5, negativo 0.25. */
 fun sentimentScore(sentiment: String) = when (sentiment) {

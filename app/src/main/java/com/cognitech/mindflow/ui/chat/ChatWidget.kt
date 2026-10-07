@@ -43,6 +43,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -110,9 +111,9 @@ private fun ChatFab(open: Boolean, onClick: () -> Unit) {
         contentAlignment = Alignment.Center,
     ) {
         if (open) {
-            Icon(Icons.Filled.Close, contentDescription = "Cerrar chat", tint = Color.White)
+            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.chat_close), tint = Color.White)
         } else {
-            Image(painterResource(R.drawable.ic_chat), contentDescription = "Abrir chat con MindFlow AI")
+            Image(painterResource(R.drawable.ic_chat), contentDescription = stringResource(R.string.chat_open))
         }
     }
 }
@@ -148,11 +149,11 @@ private fun ChatPanel(
         ) {
             Column(Modifier.weight(1f)) {
                 Text("MindFlow AI", color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-                Text("Tu espacio seguro para conversar", color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
+                Text(stringResource(R.string.chat_subtitle), color = Color.White.copy(alpha = 0.85f), fontSize = 12.sp)
             }
             Icon(
                 Icons.Filled.Close,
-                contentDescription = "Cerrar chat",
+                contentDescription = stringResource(R.string.chat_close),
                 tint = Color.White,
                 modifier = Modifier
                     .size(36.dp)
@@ -173,7 +174,7 @@ private fun ChatPanel(
         ) {
             items(state.messages) { MessageBubble(it) }
             if (state.typing) {
-                item { MessageBubble(ChatMessage("Escribiendo…", fromUser = false), muted = true) }
+                item { MessageBubble(ChatMessage(stringResource(R.string.chat_typing), fromUser = false), muted = true) }
             }
         }
 
@@ -188,7 +189,7 @@ private fun ChatPanel(
             MindFlowInput(
                 value = state.draft,
                 onValueChange = onDraftChange,
-                placeholder = "Escribe un mensaje…",
+                placeholder = stringResource(R.string.chat_placeholder),
                 fontSize = 14.sp,
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
                 shape = RoundedCornerShape(20.dp),
@@ -203,7 +204,7 @@ private fun ChatPanel(
                     .clickable(enabled = canSend, onClick = onSend),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Enviar", tint = Color.White, modifier = Modifier.size(18.dp))
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.common_send), tint = Color.White, modifier = Modifier.size(18.dp))
             }
         }
     }
