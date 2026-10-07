@@ -4,17 +4,32 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.GET
+import kotlinx.serialization.Serializable
 
 /**
  * Espejo del `SubscriptionsController` del backend (bounded context Subscriptions).
  *
- * Usa el endpoint `demo/plan/{plan}` en vez de `checkout`: ese último necesita credenciales
- * reales de Stripe (cuenta de prueba propia) que el proyecto no tiene configuradas todavía.
- * El endpoint demo activa el plan sin tocar Stripe, igual que ya anuncia el texto
- * "Modo demo: no se realizará ningún cobro real." en PlansScreen.
+ * El backend crea la sesión de Stripe y conserva las claves privadas. La app solo recibe la
+ * URL de Checkout y, al volver de Stripe, vuelve a consultar la suscripción confirmada.
  */
 interface SubscriptionApi {
 
-    @POST("api/v1/subscriptions/demo/plan/{plan}")
-    suspend fun setDemoPlan(@Path("plan") plan: String): Response<ResponseBody>
+    @POST("api/v1/subscriptions/checkout")
+    suspend fun createCheckout(): Response<ResponseBody>
+
+    @GET("api/v1/subscriptions/me")
+    suspend fun getMine(): Response<ResponseBody>
 }
+
+@Serializable
+data class CheckoutSessionResponse(
+    val checkoutUrl: String,
+    val sessionId: String,
+)
+
+@Serializable
+data class SubscriptionResponse(
+    val plan: String = "freemium",
+    val status: String = "inactive",
+)

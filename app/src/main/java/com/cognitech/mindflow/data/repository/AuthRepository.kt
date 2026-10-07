@@ -8,6 +8,8 @@ import com.cognitech.mindflow.data.local.MindFlowDatabase.Companion.TABLE_USERS
 import com.cognitech.mindflow.data.local.SessionManager
 import com.cognitech.mindflow.data.model.User
 import com.cognitech.mindflow.data.remote.ApiClient
+import com.cognitech.mindflow.data.remote.CheckoutSessionResponse
+import com.cognitech.mindflow.data.remote.SubscriptionResponse
 import com.cognitech.mindflow.data.remote.dto.AuthenticatedUserResponse
 import com.cognitech.mindflow.data.remote.dto.SignInRequest
 import com.cognitech.mindflow.data.remote.dto.SignUpRequest
@@ -103,16 +105,58 @@ class AuthRepository(
             database.writableDatabase.update(TABLE_USERS, values, "id = ?", arrayOf(userId.toString()))
         }
 
-    /**
-     * [plan] llega en el formato local ("Freemium"/"Premium"). Intenta reflejarlo en el backend
-     * vía el endpoint demo de Subscriptions (sin credenciales reales de Stripe — ver
-     * [com.cognitech.mindflow.data.remote.SubscriptionApi]); si falla (sin red, backend caído),
-     * el cambio de plan igual se aplica localmente para no bloquear al usuario.
-     */
-    suspend fun setPlan(userId: Long, plan: String) = withContext(Dispatchers.IO) {
-        runCatching { ApiClient.subscriptionApi.setDemoPlan(plan.lowercase()) }
-        val values = ContentValues().apply { put("plan", plan) }
-        database.writableDatabase.update(TABLE_USERS, values, "id = ?", arrayOf(userId.toString()))
+    /** Crea una sesión Checkout de prueba. El backend, nunca la app, usa la clave secreta Stripe. */
+    suspend fun createCheckout(): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            val response = ApiClient.subscriptionApi.createCheckout()
+            val body = response.body()
+            if (!response.isSuccessful || body == null) {
+                return@withContext Result.failure(
+                    AuthException(ApiClient.errorMessage(response) ?: "No se pudo iniciar el pago de prueba")
+                )
+            }
+            val checkout = ApiClient.parseBody(CheckoutSessionResponse.serializer(), body)
+            if (checkout.checkoutUrl.isBlank()) {
+                Result.failure(AuthException("Stripe no devolvió una URL de Checkout"))
+            } else {
+                Result.success(checkout.checkoutUrl)
+            }
+        } catch (e: IOException) {
+            Result.failure(AuthException("No se pudo conectar con el servidor."))
+        } catch (e: Exception) {
+            Result.failure(AuthException("No se pudo iniciar Checkout."))
+        }
+    }
+
+    /** Sincroniza el plan local únicamente desde la suscripción confirmada por el backend. */
+    suspend fun refreshSubscription(): Result<User?> = withContext(Dispatchers.IO) {
+        val userId = session.currentUserId ?: return@withContext Result.success(null)
+        try {
+            val response = ApiClient.subscriptionApi.getMine()
+            val body = response.body()
+            if (!response.isSuccessful || body == null) {
+                return@withContext Result.failure(
+                    AuthException(ApiClient.errorMessage(response) ?: "No se pudo actualizar la suscripción")
+                )
+            }
+            val subscription = ApiClient.parseBody(SubscriptionResponse.serializer(), body)
+            val localPlan = if (subscription.plan.equals("premium", ignoreCase = true)) {
+                User.PLAN_PREMIUM
+            } else {
+                User.PLAN_FREEMIUM
+            }
+            database.writableDatabase.update(
+                TABLE_USERS,
+                ContentValues().apply { put("plan", localPlan) },
+                "id = ?",
+                arrayOf(userId.toString()),
+            )
+            Result.success(findById(userId))
+        } catch (e: IOException) {
+            Result.failure(AuthException("No se pudo conectar con el servidor."))
+        } catch (e: Exception) {
+            Result.failure(AuthException("No se pudo actualizar la suscripción."))
+        }
     }
 
     suspend fun deleteAccount(userId: Long) = withContext(Dispatchers.IO) {

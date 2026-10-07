@@ -1,6 +1,8 @@
 package com.cognitech.mindflow.ui.plans
 
+import android.net.Uri
 import android.widget.Toast
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -26,12 +28,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -64,18 +70,40 @@ class PlansViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     var user by mutableStateOf<User?>(null)
         private set
+    var checkoutUrl by mutableStateOf<String?>(null)
+        private set
+    var isCheckoutLoading by mutableStateOf(false)
+        private set
+    var message by mutableStateOf<String?>(null)
+        private set
 
     fun load() {
-        viewModelScope.launch { user = authRepository.currentUser() }
-    }
-
-    fun setPlan(plan: String) {
-        val current = user ?: return
         viewModelScope.launch {
-            authRepository.setPlan(current.id, plan)
             user = authRepository.currentUser()
+            refreshSubscription(silent = true)
         }
     }
+
+    fun startCheckout() {
+        viewModelScope.launch {
+            isCheckoutLoading = true
+            authRepository.createCheckout()
+                .onSuccess { checkoutUrl = it }
+                .onFailure { message = it.message ?: "No se pudo iniciar Checkout" }
+            isCheckoutLoading = false
+        }
+    }
+
+    fun refreshSubscription(silent: Boolean = false) {
+        viewModelScope.launch {
+            authRepository.refreshSubscription()
+                .onSuccess { refreshed -> if (refreshed != null) user = refreshed }
+                .onFailure { if (!silent) message = it.message ?: "No se pudo actualizar el plan" }
+        }
+    }
+
+    fun checkoutOpened() { checkoutUrl = null }
+    fun consumeMessage() { message = null }
 
     fun logout() = authRepository.logout()
 }
@@ -89,7 +117,28 @@ fun PlansScreen(
     LaunchedEffect(Unit) { viewModel.load() }
     val isPremium = viewModel.user?.isPremium == true
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     var confirmUpgrade by remember { mutableStateOf(false) }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) viewModel.refreshSubscription(silent = true)
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(viewModel.checkoutUrl) {
+        viewModel.checkoutUrl?.let { url ->
+            CustomTabsIntent.Builder().build().launchUrl(context, Uri.parse(url))
+            viewModel.checkoutOpened()
+        }
+    }
+    LaunchedEffect(viewModel.message) {
+        viewModel.message?.let {
+            Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            viewModel.consumeMessage()
+        }
+    }
 
     MainScaffold(
         current = MainDestination.PLANS,
@@ -123,8 +172,7 @@ fun PlansScreen(
                 FreemiumCard(
                     isCurrent = !isPremium,
                     onDowngrade = {
-                        viewModel.setPlan(User.PLAN_FREEMIUM)
-                        Toast.makeText(context, "Tu plan ahora es Freemium", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "El cambio de plan se confirma desde el portal de pagos.", Toast.LENGTH_LONG).show()
                     },
                 )
                 PremiumCard(isCurrent = isPremium, onUpgrade = { confirmUpgrade = true })
@@ -147,13 +195,12 @@ fun PlansScreen(
             onDismissRequest = { confirmUpgrade = false },
             containerColor = White,
             title = { Text("MindFlow Premium", color = Portage, fontWeight = FontWeight.Bold) },
-            text = { Text("Se activará MindFlow Premium por \$4.99 / mes. (Modo demo: no se realizará ningún cobro real.)", color = MineShaft) },
+            text = { Text("Se abrirá Stripe en modo prueba para activar MindFlow Premium por \$4.99 / mes. No se realizará ningún cobro real.", color = MineShaft) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmUpgrade = false
-                    viewModel.setPlan(User.PLAN_PREMIUM)
-                    Toast.makeText(context, "¡Bienvenido a MindFlow Premium!", Toast.LENGTH_SHORT).show()
-                }) { Text("Confirmar", color = Portage, fontWeight = FontWeight.SemiBold) }
+                    viewModel.startCheckout()
+                }, enabled = !viewModel.isCheckoutLoading) { Text(if (viewModel.isCheckoutLoading) "Preparando..." else "Continuar", color = Portage, fontWeight = FontWeight.SemiBold) }
             },
             dismissButton = { TextButton(onClick = { confirmUpgrade = false }) { Text("Cancelar", color = Gray) } },
         )
