@@ -35,6 +35,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -142,14 +143,14 @@ fun PlansScreen(
     MainScaffold(
         current = MainDestination.PLANS,
         onNavigate = onNavigate,
-        header = { ScreenHeader("Planes") },
+        header = { ScreenHeader(stringResource(R.string.plans_title)) },
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                "Invierte en tu bienestar emocional",
+                stringResource(R.string.plans_headline),
                 color = MineShaft,
                 fontSize = 32.sp,
                 fontWeight = FontWeight.Bold,
@@ -157,17 +158,18 @@ fun PlansScreen(
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "Elige el plan que mejor se adapte a tu ritmo. Demócrata e inteligente, MindFlow te acompaña en cada paso hacia tu calma mental.",
+                stringResource(R.string.plans_subheadline),
                 color = Gray,
                 fontSize = 16.sp,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(48.dp))
+            val downgradeMessage = stringResource(R.string.plans_downgrade_toast)
             Column(verticalArrangement = Arrangement.spacedBy(32.dp)) {
                 FreemiumCard(
                     isCurrent = !isPremium,
                     onDowngrade = {
-                        Toast.makeText(context, "El cambio de plan se confirma desde el portal de pagos.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, downgradeMessage, Toast.LENGTH_LONG).show()
                     },
                 )
                 PremiumCard(isCurrent = isPremium, onUpgrade = { confirmUpgrade = true })
@@ -176,7 +178,7 @@ fun PlansScreen(
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Image(painterResource(R.drawable.ic_lock), contentDescription = null, modifier = Modifier.size(16.dp))
                 Text(
-                    "Pagos encriptados y procesados de forma segura a través de Stripe.",
+                    stringResource(R.string.plans_stripe_disclosure),
                     color = Gray,
                     fontSize = 12.8.sp,
                     textAlign = TextAlign.Center,
@@ -190,14 +192,14 @@ fun PlansScreen(
             onDismissRequest = { confirmUpgrade = false },
             containerColor = White,
             title = { Text("MindFlow Premium", color = Portage, fontWeight = FontWeight.Bold) },
-            text = { Text("Se abrirá Stripe en modo prueba para activar MindFlow Premium por \$4.99 / mes. No se realizará ningún cobro real.", color = MineShaft) },
+            text = { Text(stringResource(R.string.plans_checkout_disclaimer), color = MineShaft) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmUpgrade = false
                     viewModel.startCheckout()
-                }, enabled = !viewModel.isCheckoutLoading) { Text(if (viewModel.isCheckoutLoading) "Preparando..." else "Continuar", color = Portage, fontWeight = FontWeight.SemiBold) }
+                }, enabled = !viewModel.isCheckoutLoading) { Text(stringResource(if (viewModel.isCheckoutLoading) R.string.common_preparing else R.string.common_continue), color = Portage, fontWeight = FontWeight.SemiBold) }
             },
-            dismissButton = { TextButton(onClick = { confirmUpgrade = false }) { Text("Cancelar", color = Gray) } },
+            dismissButton = { TextButton(onClick = { confirmUpgrade = false }) { Text(stringResource(R.string.common_cancel), color = Gray) } },
         )
     }
 }
@@ -216,18 +218,18 @@ private fun FreemiumCard(isCurrent: Boolean, onDowngrade: () -> Unit) {
         Text("Freemium", color = MineShaft, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
         Price("\$0")
         Text(
-            "Todo lo necesario para empezar a construir autoconocimiento.",
+            stringResource(R.string.plans_freemium_tagline),
             color = Gray,
             fontSize = 14.4.sp,
             modifier = Modifier.padding(bottom = 32.dp),
         )
         Column(Modifier.padding(bottom = 56.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Feature("AI Mood Journal:", " Diario interactivo con NLP")
-            Feature("Dynamic Habit Tracker:", " Ajuste basado en estrés")
-            Feature("Smart Interventions:", " Guías de respiración y meditación")
-            Feature("Analíticas Básicas:", " Calendario y Word Cloud")
-            MissingFeature("Exportación de Reportes PDF")
-            MissingFeature("Exportación de Datos CSV")
+            Feature("AI Mood Journal:", stringResource(R.string.plans_feature_mood_journal))
+            Feature("Dynamic Habit Tracker:", stringResource(R.string.plans_feature_habit_tracker))
+            Feature("Smart Interventions:", stringResource(R.string.plans_feature_interventions))
+            Feature(stringResource(R.string.plans_feature_basic_analytics_bold), stringResource(R.string.plans_feature_basic_analytics_rest))
+            MissingFeature(stringResource(R.string.plans_feature_pdf_export))
+            MissingFeature(stringResource(R.string.plans_feature_csv_export))
         }
         val buttonShape = RoundedCornerShape(8.dp)
         Box(
@@ -240,7 +242,7 @@ private fun FreemiumCard(isCurrent: Boolean, onDowngrade: () -> Unit) {
                 .padding(13.8.dp),
             contentAlignment = Alignment.Center,
         ) {
-            Text(if (isCurrent) "Tu Plan Actual" else "Volver a Freemium", color = Gray, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(if (isCurrent) R.string.plans_current_plan else R.string.plans_back_to_freemium), color = Gray, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
         }
     }
 }
@@ -260,20 +262,20 @@ private fun PremiumCard(isCurrent: Boolean, onUpgrade: () -> Unit) {
             Text("MindFlow Premium", color = Portage, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 8.dp))
             Price("\$4.99")
             Text(
-                "Para quienes buscan un análisis profundo y acompañamiento profesional.",
+                stringResource(R.string.plans_premium_tagline),
                 color = Gray,
                 fontSize = 14.4.sp,
                 modifier = Modifier.padding(bottom = 32.dp),
             )
             Column(Modifier.padding(bottom = 57.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Feature("Todo lo incluido en Freemium", "")
-                Feature("Exportación PDF:", " Descarga historiales clínicos estructurados para tu psicólogo.")
-                Feature("Exportación CSV:", " Accede a tus datos en bruto para análisis personal en Excel.")
-                Feature("Analíticas Avanzadas:", " Gráficos detallados de fluctuación emocional.")
-                Feature("Soporte Prioritario:", " Resolución de dudas técnicas.")
+                Feature(stringResource(R.string.plans_feature_all_freemium), "")
+                Feature(stringResource(R.string.plans_feature_pdf_bold), stringResource(R.string.plans_feature_pdf_detail))
+                Feature(stringResource(R.string.plans_feature_csv_bold), stringResource(R.string.plans_feature_csv_detail))
+                Feature(stringResource(R.string.plans_feature_advanced_analytics_bold), stringResource(R.string.plans_feature_advanced_analytics_rest))
+                Feature(stringResource(R.string.plans_feature_priority_support_bold), stringResource(R.string.plans_feature_priority_support_rest))
             }
             GradientButton(
-                text = if (isCurrent) "Tu Plan Actual" else "Actualizar a Premium",
+                text = stringResource(if (isCurrent) R.string.plans_current_plan else R.string.plans_upgrade_to_premium),
                 onClick = onUpgrade,
                 enabled = !isCurrent,
                 contentPadding = PaddingValues(12.8.dp),
@@ -288,7 +290,7 @@ private fun PremiumCard(isCurrent: Boolean, onUpgrade: () -> Unit) {
                 .background(Portage, RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp))
                 .padding(horizontal = 24.dp, vertical = 4.8.dp)
         ) {
-            Text("RECOMENDADO", color = Color.White, fontSize = 12.8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
+            Text(stringResource(R.string.plans_recommended), color = Color.White, fontSize = 12.8.sp, fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
         }
     }
 }
@@ -297,7 +299,7 @@ private fun PremiumCard(isCurrent: Boolean, onUpgrade: () -> Unit) {
 private fun Price(amount: String) {
     Row(verticalAlignment = Alignment.Bottom, modifier = Modifier.padding(bottom = 24.dp)) {
         Text(amount, color = MineShaft, fontSize = 40.sp, fontWeight = FontWeight.Bold)
-        Text(" / mes", color = Gray, fontSize = 16.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(bottom = 9.dp))
+        Text(stringResource(R.string.plans_per_month), color = Gray, fontSize = 16.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(bottom = 9.dp))
     }
 }
 

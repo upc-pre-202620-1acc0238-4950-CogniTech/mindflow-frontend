@@ -35,10 +35,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cognitech.mindflow.R
+
 import com.cognitech.mindflow.data.model.JournalEntry
 import com.cognitech.mindflow.data.model.JournalFilterChips
 import com.cognitech.mindflow.data.model.Sentiment
@@ -88,8 +91,7 @@ fun JournalScreen(
             val filtered = state.filtered
             if (filtered.isEmpty()) {
                 Text(
-                    if (state.entries.isEmpty()) "Aún no tienes registros. Escribe tu primer pensamiento desde el Dashboard."
-                    else "No hay registros que coincidan con los filtros.",
+                    stringResource(if (state.entries.isEmpty()) R.string.journal_empty_global else R.string.journal_empty_filtered),
                     color = Gray,
                     fontSize = 13.6.sp,
                     modifier = Modifier.padding(horizontal = 8.dp),
@@ -111,12 +113,12 @@ private fun JournalHeader(query: String, onQueryChange: (String) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text("Tu Historial Emocional", color = MineShaft, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.journal_title), color = MineShaft, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             }
             MindFlowInput(
                 value = query,
                 onValueChange = onQueryChange,
-                placeholder = "Buscar en la plataforma...",
+                placeholder = stringResource(R.string.journal_search_placeholder),
                 fontSize = 13.6.sp,
                 shape = RoundedCornerShape(20.dp),
                 contentPadding = PaddingValues(horizontal = 17.dp, vertical = 9.dp),
@@ -135,7 +137,7 @@ private fun FiltersCalendarCard(state: JournalState, viewModel: JournalViewModel
         MindFlowInput(
             value = state.query,
             onValueChange = viewModel::onQueryChange,
-            placeholder = "Buscar en tus pensamientos...",
+            placeholder = stringResource(R.string.journal_search_placeholder_card),
             background = White,
             fontSize = 14.4.sp,
             contentPadding = PaddingValues(13.dp),
@@ -163,7 +165,7 @@ private fun FiltersCalendarCard(state: JournalState, viewModel: JournalViewModel
         ) {
             Text(monthYearLabel(state.month.atDay(1)), color = MineShaft, fontSize = 16.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
             Text(
-                if (state.month == java.time.YearMonth.now()) "Ver Mes Anterior" else "Ver Mes Actual",
+                stringResource(if (state.month == java.time.YearMonth.now()) R.string.journal_prev_month else R.string.journal_current_month),
                 color = CornflowerBlue,
                 fontSize = 12.8.sp,
                 modifier = Modifier.clickable(onClick = viewModel::toggleMonth),
@@ -174,9 +176,9 @@ private fun FiltersCalendarCard(state: JournalState, viewModel: JournalViewModel
             modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
             horizontalArrangement = Arrangement.spacedBy(9.8.dp, Alignment.CenterHorizontally),
         ) {
-            Text("● Positivo", color = Downy, fontSize = 12.sp)
-            Text("● Neutral", color = GoldenTainoi, fontSize = 12.sp)
-            Text("● Negativo", color = VividTangerine, fontSize = 12.sp)
+            Text(stringResource(R.string.journal_legend_positive), color = Downy, fontSize = 12.sp)
+            Text(stringResource(R.string.journal_legend_neutral), color = GoldenTainoi, fontSize = 12.sp)
+            Text(stringResource(R.string.journal_legend_negative), color = VividTangerine, fontSize = 12.sp)
         }
     }
 }
@@ -197,7 +199,7 @@ private fun SentimentSelector(value: String?, onChange: (String?) -> Unit, modif
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                "Estado: " + (value?.let(Sentiment::label) ?: "Todos"),
+                stringResource(R.string.journal_sentiment_filter, value?.let(Sentiment::label) ?: stringResource(R.string.common_all)),
                 color = Gray,
                 fontSize = 12.8.sp,
                 lineHeight = 15.sp,
@@ -209,7 +211,7 @@ private fun SentimentSelector(value: String?, onChange: (String?) -> Unit, modif
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }, containerColor = White) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(option?.let(Sentiment::label) ?: "Todos", fontSize = 13.6.sp, color = MineShaft) },
+                    text = { Text(option?.let(Sentiment::label) ?: stringResource(R.string.common_all), fontSize = 13.6.sp, color = MineShaft) },
                     onClick = {
                         onChange(option)
                         expanded = false
@@ -248,7 +250,7 @@ private fun DateField(value: LocalDate?, onChange: (LocalDate?) -> Unit, modifie
         if (value != null) {
             Text("✕", color = Gray, fontSize = 12.sp, modifier = Modifier.clickable { onChange(null) }.padding(horizontal = 4.dp))
         } else {
-            Image(painterResource(R.drawable.ic_calendar), contentDescription = "Elegir fecha", modifier = Modifier.size(width = 12.8.dp, height = 12.dp))
+            Image(painterResource(R.drawable.ic_calendar), contentDescription = stringResource(R.string.journal_pick_date), modifier = Modifier.size(width = 12.8.dp, height = 12.dp))
         }
     }
 }
@@ -262,7 +264,7 @@ private fun MoodCalendar(state: JournalState, onDayClick: (LocalDate) -> Unit) {
     val byDay = state.entries.groupBy { it.createdAt.toLocalDate() }
 
     Row(Modifier.fillMaxWidth().padding(top = 6.dp)) {
-        listOf("L", "M", "X", "J", "V", "S", "D").forEach {
+        stringArrayResource(R.array.weekday_initials).forEach {
             Text(
                 it,
                 color = Gray,

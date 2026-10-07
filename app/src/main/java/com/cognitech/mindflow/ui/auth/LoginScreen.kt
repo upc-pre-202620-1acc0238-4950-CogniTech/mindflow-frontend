@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.R
 import com.cognitech.mindflow.ui.components.DividerWithText
 import com.cognitech.mindflow.ui.components.GoogleButton
 import com.cognitech.mindflow.ui.components.GradientButton
@@ -83,20 +85,20 @@ fun LoginScreen(
         ) {
             MindFlowLogo()
             Spacer(Modifier.height(32.dp))
-            Text("Bienvenido de nuevo", color = MineShaft, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.login_welcome_back), color = MineShaft, fontSize = 32.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Text(
-                "Tu espacio seguro para la reflexión y el crecimiento personal.",
+                stringResource(R.string.login_subtitle),
                 color = Gray,
                 fontSize = 15.2.sp,
             )
             Spacer(Modifier.height(32.dp))
-            GoogleButton("Iniciar sesión con Google", onClick = onGoogleClick)
+            GoogleButton(stringResource(R.string.login_google), onClick = onGoogleClick)
             Spacer(Modifier.height(24.dp))
-            DividerWithText("o ingresa con tu correo")
+            DividerWithText(stringResource(R.string.login_or_email))
             Spacer(Modifier.height(24.dp))
             LabeledInput(
-                label = "Correo Electrónico",
+                label = stringResource(R.string.settings_email),
                 value = state.email,
                 onValueChange = viewModel::onEmailChange,
                 placeholder = "ejemplo@correo.com",
@@ -105,7 +107,7 @@ fun LoginScreen(
             )
             Spacer(Modifier.height(19.2.dp))
             LabeledInput(
-                label = "Contraseña",
+                label = stringResource(R.string.login_password),
                 value = state.password,
                 onValueChange = viewModel::onPasswordChange,
                 placeholder = "••••••••",
@@ -114,7 +116,7 @@ fun LoginScreen(
             )
             Spacer(Modifier.height(11.2.dp))
             Text(
-                "¿Olvidaste tu contraseña?",
+                stringResource(R.string.login_forgot_password),
                 color = CornflowerBlue,
                 fontSize = 13.6.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -127,7 +129,7 @@ fun LoginScreen(
             }
             Spacer(Modifier.height(24.dp))
             GradientButton(
-                text = "Ingresar a MindFlow",
+                text = stringResource(R.string.login_submit),
                 onClick = { viewModel.signIn(onLoggedIn) },
                 loading = state.loading,
                 modifier = Modifier.fillMaxWidth(),
@@ -135,9 +137,9 @@ fun LoginScreen(
             Spacer(Modifier.height(24.dp))
             Text(
                 buildAnnotatedString {
-                    append("¿Aún no tienes una cuenta? ")
+                    append(stringResource(R.string.login_no_account))
                     withStyle(SpanStyle(color = CornflowerBlue, fontWeight = FontWeight.SemiBold)) {
-                        append("Regístrate gratis")
+                        append(stringResource(R.string.login_register_free))
                     }
                 },
                 color = Gray,
@@ -154,9 +156,9 @@ fun LoginScreen(
     if (showForgotDialog) {
         AlertDialog(
             onDismissRequest = { showForgotDialog = false },
-            confirmButton = { TextButton(onClick = { showForgotDialog = false }) { Text("Entendido") } },
-            title = { Text("Recuperar contraseña") },
-            text = { Text("La recuperación de contraseña por correo estará disponible cuando la app se conecte al servidor de MindFlow.") },
+            confirmButton = { TextButton(onClick = { showForgotDialog = false }) { Text(stringResource(R.string.common_understood)) } },
+            title = { Text(stringResource(R.string.login_recover_password)) },
+            text = { Text(stringResource(R.string.login_recover_password_body)) },
         )
     }
 }
@@ -192,7 +194,7 @@ private fun LoginTestimonialPanel() {
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Text(
-                "Retoma el control de tu calma interior.",
+                stringResource(R.string.login_testimonial_headline),
                 color = White,
                 fontSize = 40.sp,
                 lineHeight = 48.sp,
@@ -206,7 +208,7 @@ private fun LoginTestimonialPanel() {
                     .padding(33.dp),
             ) {
                 Text(
-                    "\"MindFlow no solo es un diario, es como tener un asistente emocional. La retroalimentación de la IA me ha ayudado a reducir mis picos de ansiedad durante los cierres de proyecto.\"",
+                    stringResource(R.string.login_testimonial_quote),
                     color = White,
                     fontSize = 19.2.sp,
                     lineHeight = 30.72.sp,

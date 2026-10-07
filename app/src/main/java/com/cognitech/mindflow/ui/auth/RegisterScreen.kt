@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.R
 import com.cognitech.mindflow.ui.components.DividerWithText
 import com.cognitech.mindflow.ui.components.GoogleButton
 import com.cognitech.mindflow.ui.components.GradientButton
@@ -74,28 +76,28 @@ fun RegisterScreen(
         ) {
             MindFlowLogo()
             Spacer(Modifier.height(32.dp))
-            Text("Crea tu cuenta gratis", color = MineShaft, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.register_title), color = MineShaft, fontSize = 32.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Text(
-                "Únete a la plataforma que democratiza el acceso a herramientas de bienestar emocional con IA.",
+                stringResource(R.string.register_subtitle),
                 color = Gray,
                 fontSize = 15.2.sp,
             )
             Spacer(Modifier.height(32.dp))
-            GoogleButton("Registrarse con Google", onClick = onGoogleClick)
+            GoogleButton(stringResource(R.string.register_google), onClick = onGoogleClick)
             Spacer(Modifier.height(24.dp))
-            DividerWithText("o usar correo electrónico")
+            DividerWithText(stringResource(R.string.register_or_email))
             Spacer(Modifier.height(24.dp))
             LabeledInput(
-                label = "Nombre Completo",
+                label = stringResource(R.string.settings_full_name),
                 value = state.name,
                 onValueChange = viewModel::onNameChange,
-                placeholder = "Ej. Alex Developer",
+                placeholder = stringResource(R.string.register_name_placeholder),
                 error = state.nameError,
             )
             Spacer(Modifier.height(19.2.dp))
             LabeledInput(
-                label = "Correo Electrónico",
+                label = stringResource(R.string.settings_email),
                 value = state.email,
                 onValueChange = viewModel::onEmailChange,
                 placeholder = "ejemplo@correo.com",
@@ -104,25 +106,25 @@ fun RegisterScreen(
             )
             Spacer(Modifier.height(19.2.dp))
             LabeledInput(
-                label = "Crea una contraseña",
+                label = stringResource(R.string.register_password_label),
                 value = state.password,
                 onValueChange = viewModel::onPasswordChange,
-                placeholder = "Mínimo 8 caracteres",
+                placeholder = stringResource(R.string.register_password_placeholder),
                 isPassword = true,
                 error = state.passwordError,
             )
             Spacer(Modifier.height(19.2.dp))
             Text(
                 buildAnnotatedString {
-                    append("Al registrarte, aceptas nuestros ")
+                    append(stringResource(R.string.register_terms_prefix))
                     withStyle(SpanStyle(color = CornflowerBlue, textDecoration = TextDecoration.Underline)) {
-                        append("Términos de Servicio")
+                        append(stringResource(R.string.register_terms_of_service))
                     }
-                    append(" y ")
+                    append(stringResource(R.string.register_terms_and))
                     withStyle(SpanStyle(color = CornflowerBlue, textDecoration = TextDecoration.Underline)) {
-                        append("Política de Privacidad")
+                        append(stringResource(R.string.register_privacy_policy))
                     }
-                    append(" (Datos encriptados con AES-256).")
+                    append(stringResource(R.string.register_terms_suffix))
                 },
                 color = Gray,
                 fontSize = 12.sp,
@@ -133,7 +135,7 @@ fun RegisterScreen(
             }
             Spacer(Modifier.height(19.2.dp))
             GradientButton(
-                text = "Crear mi cuenta",
+                text = stringResource(R.string.register_submit),
                 onClick = { viewModel.signUp(onRegistered) },
                 loading = state.loading,
                 modifier = Modifier.fillMaxWidth(),
@@ -141,9 +143,9 @@ fun RegisterScreen(
             Spacer(Modifier.height(24.dp))
             Text(
                 buildAnnotatedString {
-                    append("¿Ya tienes una cuenta? ")
+                    append(stringResource(R.string.register_has_account))
                     withStyle(SpanStyle(color = CornflowerBlue, fontWeight = FontWeight.SemiBold)) {
-                        append("Inicia sesión aquí")
+                        append(stringResource(R.string.register_login_here))
                     }
                 },
                 color = Gray,
@@ -181,15 +183,15 @@ private fun RegisterFeaturesPanel() {
             verticalArrangement = Arrangement.spacedBy(32.dp),
         ) {
             Text(
-                "Empodera tu mente.\nTransforma tus días.",
+                stringResource(R.string.register_features_headline),
                 color = White,
                 fontSize = 35.2.sp,
                 lineHeight = 42.24.sp,
                 fontWeight = FontWeight.Bold,
             )
-            Feature("🧠", "AI Mood Journal", "Procesamos tus registros para ofrecerte contención empática y validación en tiempo real.")
-            Feature("📊", "Dynamic Habit Tracker", "Un gestor de tareas que entiende tu nivel de estrés y ajusta la exigencia para evitar el burnout.")
-            Feature("🌬️", "Smart Interventions", "Recibe sugerencias automáticas de micro-meditaciones y pausas justo cuando más lo necesitas.")
+            Feature("🧠", "AI Mood Journal", stringResource(R.string.register_feature_mood_journal))
+            Feature("📊", "Dynamic Habit Tracker", stringResource(R.string.register_feature_habit_tracker))
+            Feature("🌬️", "Smart Interventions", stringResource(R.string.register_feature_interventions))
         }
     }
 }

@@ -32,9 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.R
 import com.cognitech.mindflow.ui.chat.ChatWidget
 import com.cognitech.mindflow.ui.theme.CatskillWhite
 import com.cognitech.mindflow.ui.theme.CornflowerBlue
@@ -46,13 +48,13 @@ import com.cognitech.mindflow.ui.theme.ThemeState
 import com.cognitech.mindflow.ui.theme.White
 
 /** Destinos del menú móvil, en el mismo orden que el Figma. */
-enum class MainDestination(val route: String, val label: String) {
-    DASHBOARD("home", "Dashboard"),
-    JOURNAL("journal", "Diario (Journal)"),
-    HABITS("habits", "Hábitos"),
-    ANALYTICS("analytics", "Analíticas"),
-    SETTINGS("settings", "Configuración"),
-    PLANS("plans", "Planes"),
+enum class MainDestination(val route: String) {
+    DASHBOARD("home"),
+    JOURNAL("journal"),
+    HABITS("habits"),
+    ANALYTICS("analytics"),
+    SETTINGS("settings"),
+    PLANS("plans"),
 }
 
 /** Tabs visibles en la barra inferior, en este orden. Planes vive dentro de Configuración. */
@@ -130,7 +132,7 @@ private fun BottomNavBar(current: MainDestination, onNavigate: (MainDestination)
                 ) {
                     Icon(
                         icon,
-                        contentDescription = destination.label,
+                        contentDescription = stringResource(destination.labelRes()),
                         tint = if (selected) CornflowerBlue else Gray400,
                         modifier = Modifier.size(26.dp),
                     )
@@ -138,6 +140,15 @@ private fun BottomNavBar(current: MainDestination, onNavigate: (MainDestination)
             }
         }
     }
+}
+
+private fun MainDestination.labelRes(): Int = when (this) {
+    MainDestination.DASHBOARD -> R.string.nav_home
+    MainDestination.JOURNAL -> R.string.nav_journal
+    MainDestination.HABITS -> R.string.nav_habits
+    MainDestination.ANALYTICS -> R.string.nav_analytics
+    MainDestination.SETTINGS -> R.string.nav_profile
+    MainDestination.PLANS -> R.string.nav_plans
 }
 
 /** Header blanco de 70dp con borde inferior #E5E5E5. */

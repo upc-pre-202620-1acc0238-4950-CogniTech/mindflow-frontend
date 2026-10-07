@@ -3,6 +3,8 @@ package com.cognitech.mindflow.ui.navigation
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.cognitech.mindflow.R
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -36,8 +38,9 @@ object Routes {
 @Composable
 fun AppNavigation(app: MindFlowApplication, navController: NavHostController = rememberNavController()) {
     val context = LocalContext.current
+    val googleNotAvailableMessage = stringResource(R.string.common_google_not_available)
     val googleNotAvailable = {
-        Toast.makeText(context, "El acceso con Google estará disponible pronto", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, googleNotAvailableMessage, Toast.LENGTH_SHORT).show()
     }
     val auth = app.authUseCases
     val legacyAuth = app.authRepository

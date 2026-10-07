@@ -30,11 +30,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cognitech.mindflow.R
 import com.cognitech.mindflow.data.model.Habit
 import com.cognitech.mindflow.data.model.JournalCategories
 import com.cognitech.mindflow.data.model.JournalEntry
@@ -82,7 +86,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) { viewModel.load() }
     val state = viewModel.state
     var intervention by remember { mutableStateOf<Intervention?>(null) }
-    val firstName = state.user?.name?.substringBefore(" ").orEmpty().ifBlank { "Usuario" }
+    val firstName = state.user?.name?.substringBefore(" ").orEmpty().ifBlank { stringResource(R.string.common_user_fallback) }
 
     MainScaffold(
         current = MainDestination.DASHBOARD,
@@ -117,14 +121,14 @@ fun HomeScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    "Intervenciones Rápidas",
+                    stringResource(R.string.home_quick_interventions),
                     color = MineShaft,
                     fontSize = 17.6.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 8.dp),
                 )
-                InterventionButton("Respiración 4-7-8") { intervention = Intervention.BREATHING_478 }
-                InterventionButton("Micro-meditación (3 min)") { intervention = Intervention.MICRO_MEDITATION }
+                InterventionButton(stringResource(R.string.home_breathing)) { intervention = Intervention.BREATHING_478 }
+                InterventionButton(stringResource(R.string.home_micro_meditation)) { intervention = Intervention.MICRO_MEDITATION }
             }
             DailyHabitsCard(state.habits.take(3), onToggle = viewModel::toggleHabit)
             Spacer(Modifier.height(8.dp))
@@ -146,9 +150,9 @@ private fun HomeHeader(firstName: String, initial: String, onAvatarClick: () -> 
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(Modifier.weight(1f)) {
-                Text("Hola, $firstName", color = MineShaft, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.home_greeting, firstName), color = MineShaft, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Text(
-                    "${LocalDate.now().longLabel()} - Tu IA está lista para escucharte.",
+                    stringResource(R.string.home_subtitle, LocalDate.now().longLabel()),
                     color = Gray,
                     fontSize = 13.6.sp,
                     lineHeight = 16.sp,
@@ -177,7 +181,7 @@ private fun MoodCard(
 ) {
     MindCard(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("¿Cómo te sientes en este momento?", color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.home_mood_question), color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.SemiBold)
             Row(
                 modifier = Modifier
                     .background(CatskillWhite, RoundedCornerShape(20.dp))
@@ -186,13 +190,13 @@ private fun MoodCard(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
             ) {
                 Box(Modifier.size(6.dp).background(Downy, CircleShape))
-                Text("MindFlow AI Activa", color = CornflowerBlue, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.home_ai_active), color = CornflowerBlue, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
             }
         }
         MindFlowInput(
             value = draft,
             onValueChange = onDraftChange,
-            placeholder = "Escribe aquí tus pensamientos. Este es un espacio seguro y encriptado...",
+            placeholder = stringResource(R.string.home_mood_placeholder),
             singleLine = false,
             minHeight = 100.dp,
             contentPadding = PaddingValues(17.dp),
@@ -205,7 +209,7 @@ private fun MoodCard(
         ) {
             CategorySelector(category, onCategoryChange, Modifier.weight(1f).padding(end = 8.dp))
             GradientButton(
-                text = "Guardar Registro",
+                text = stringResource(R.string.home_save_entry),
                 onClick = onSave,
                 enabled = draft.isNotBlank(),
                 loading = saving,
@@ -220,11 +224,10 @@ private fun MoodCard(
             radius = 8.dp,
             padding = PaddingValues(start = 22.2.dp, end = 19.2.dp, top = 27.2.dp, bottom = 19.2.dp),
         ) {
-            Text("✨ MindFlow AI", color = CornflowerBlue, fontSize = 14.4.sp, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.home_ai_card_label), color = CornflowerBlue, fontSize = 14.4.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Text(
-                lastAiResponse
-                    ?: "Hola, estoy aquí para escucharte. Cuéntame cómo te sientes hoy y te daré una respuesta personalizada.",
+                lastAiResponse ?: stringResource(R.string.home_ai_fallback),
                 color = MineShaft,
                 fontSize = 14.4.sp,
                 lineHeight = 21.6.sp,
@@ -236,9 +239,9 @@ private fun MoodCard(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text("Conversaciones Recientes", color = MineShaft, fontSize = 15.2.sp, fontWeight = FontWeight.SemiBold)
+                Text(stringResource(R.string.home_recent_conversations), color = MineShaft, fontSize = 15.2.sp, fontWeight = FontWeight.SemiBold)
                 Text(
-                    if (showAll) "Ver solo las recientes" else "Ver historial completo de conversaciones",
+                    stringResource(if (showAll) R.string.home_view_recent_only else R.string.home_view_full_history),
                     color = CornflowerBlue,
                     fontSize = 12.8.sp,
                     modifier = Modifier.clickable(enabled = entries.size > RECENT_LIMIT, onClick = onToggleHistory),
@@ -246,7 +249,7 @@ private fun MoodCard(
             }
             if (entries.isEmpty()) {
                 Text(
-                    "Aún no tienes registros. Escribe cómo te sientes para empezar.",
+                    stringResource(R.string.home_no_entries),
                     color = Gray,
                     fontSize = 13.6.sp,
                     modifier = Modifier.padding(horizontal = 13.8.dp),
@@ -317,13 +320,13 @@ private fun WeeklyMoodCard(entries: List<JournalEntry>, onFullReport: () -> Unit
     val monday = weekStart()
     val today = LocalDate.now()
     val byDay = entries.groupBy { it.createdAt.toLocalDate() }
-    val labels = listOf("L", "M", "X", "J", "V", "S", "D")
+    val labels = stringArrayResource(R.array.weekday_initials)
     val maxBar = 78f
 
     MindCard(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Resumen Semanal de Ánimo", color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.SemiBold)
-            Text("Ver Reporte Completo", color = CornflowerBlue, fontSize = 13.6.sp, modifier = Modifier.clickable(onClick = onFullReport))
+            Text(stringResource(R.string.home_weekly_mood_summary), color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.home_view_full_report), color = CornflowerBlue, fontSize = 13.6.sp, modifier = Modifier.clickable(onClick = onFullReport))
         }
         Row(
             modifier = Modifier
@@ -390,7 +393,7 @@ private fun InterventionButton(text: String, onClick: () -> Unit) {
 @Composable
 private fun DailyHabitsCard(habits: List<Habit>, onToggle: (Habit) -> Unit) {
     MindCard(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        Text("Hábitos Diarios", color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.home_daily_habits), color = MineShaft, fontSize = 17.6.sp, fontWeight = FontWeight.SemiBold)
         Column {
             habits.forEachIndexed { index, habit ->
                 Row(
@@ -421,7 +424,7 @@ private fun DailyHabitsCard(habits: List<Habit>, onToggle: (Habit) -> Unit) {
 private fun StreakBadge(habit: Habit) {
     when {
         habit.streak > 0 && habit.doneToday -> Tag(
-            text = "🔥 ${habit.streak} ${if (habit.streak == 1) "día" else "días"}",
+            text = "🔥 " + pluralStringResource(R.plurals.days_count, habit.streak, habit.streak),
             background = Serenade,
             contentColor = Zest,
             fontWeight = FontWeight.SemiBold,
@@ -429,7 +432,7 @@ private fun StreakBadge(habit: Habit) {
             contentPadding = PaddingValues(horizontal = 9.6.dp, vertical = 3.2.dp),
         )
         habit.streak > 0 -> Tag(
-            text = "🔥 ${habit.streak} ${if (habit.streak == 1) "día" else "días"}",
+            text = "🔥 " + pluralStringResource(R.plurals.days_count, habit.streak, habit.streak),
             background = White,
             contentColor = Gray,
             fontWeight = FontWeight.SemiBold,
