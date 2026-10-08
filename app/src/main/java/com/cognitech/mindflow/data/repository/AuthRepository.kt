@@ -11,6 +11,7 @@ import com.cognitech.mindflow.data.remote.ApiClient
 import com.cognitech.mindflow.data.remote.CheckoutSessionResponse
 import com.cognitech.mindflow.data.remote.SubscriptionResponse
 import com.cognitech.mindflow.data.remote.dto.AuthenticatedUserResponse
+import com.cognitech.mindflow.data.remote.dto.GoogleAuthRequest
 import com.cognitech.mindflow.data.remote.dto.SignInRequest
 import com.cognitech.mindflow.data.remote.dto.SignUpRequest
 import kotlinx.coroutines.Dispatchers
@@ -90,6 +91,33 @@ class AuthRepository(
                 Result.failure(AuthException("No se pudo conectar con el servidor. Verifica tu conexión."))
             }
         }
+
+    /** Intercambia el ID token emitido por Google por el JWT propio de MindFlow. */
+    suspend fun signInWithGoogle(credential: String): Result<User> = withContext(Dispatchers.IO) {
+        try {
+            val body = ApiClient.toJsonBody(GoogleAuthRequest.serializer(), GoogleAuthRequest(credential))
+            val response = ApiClient.authApi.googleAuth(body)
+            val responseBody = response.body()
+            if (!response.isSuccessful || responseBody == null) {
+                return@withContext Result.failure(
+                    AuthException(ApiClient.errorMessage(response) ?: "No se pudo iniciar sesión con Google")
+                )
+            }
+
+            val auth = ApiClient.parseBody(AuthenticatedUserResponse.serializer(), responseBody)
+            val userId = auth.id.toLong()
+            val isNewLocalAccount = findById(userId) == null
+            // Google nunca entrega una contraseña: se guarda una marca local no reutilizable.
+            cacheUser(userId, auth.email, "google:$userId")
+            if (isNewLocalAccount) habitRepository.seedDefaults(userId)
+            session.login(userId, auth.token)
+            Result.success(findById(userId)!!)
+        } catch (e: IOException) {
+            Result.failure(AuthException("No se pudo conectar con el servidor. Verifica tu conexión."))
+        } catch (e: Exception) {
+            Result.failure(AuthException("No se pudo iniciar sesión con Google."))
+        }
+    }
 
     suspend fun currentUser(): User? = withContext(Dispatchers.IO) {
         session.currentUserId?.let(::findById)

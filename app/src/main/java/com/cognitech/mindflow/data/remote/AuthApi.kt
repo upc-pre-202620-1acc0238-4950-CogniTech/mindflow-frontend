@@ -19,4 +19,7 @@ interface AuthApi {
 
     @POST("api/v1/users/sign-in")
     suspend fun signIn(@Body request: RequestBody): Response<ResponseBody>
+
+    @POST("api/v1/users/google-auth")
+    suspend fun googleAuth(@Body request: RequestBody): Response<ResponseBody>
 }

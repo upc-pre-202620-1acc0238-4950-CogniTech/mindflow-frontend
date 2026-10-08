@@ -1,10 +1,17 @@
 package com.cognitech.mindflow.ui.navigation
 
+import android.app.Activity
 import android.widget.Toast
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.cognitech.mindflow.R
+import com.cognitech.mindflow.BuildConfig
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -29,6 +36,9 @@ import com.cognitech.mindflow.ui.plans.PlansScreen
 import com.cognitech.mindflow.ui.plans.PlansViewModel
 import com.cognitech.mindflow.ui.settings.SettingsScreen
 import com.cognitech.mindflow.ui.settings.SettingsViewModel
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
 
 object Routes {
     const val LOGIN = "login"
@@ -38,12 +48,39 @@ object Routes {
 @Composable
 fun AppNavigation(app: MindFlowApplication, navController: NavHostController = rememberNavController()) {
     val context = LocalContext.current
-    val googleNotAvailableMessage = stringResource(R.string.common_google_not_available)
-    val googleNotAvailable = {
-        Toast.makeText(context, googleNotAvailableMessage, Toast.LENGTH_SHORT).show()
-    }
+    val scope = rememberCoroutineScope()
     val auth = app.authUseCases
     val legacyAuth = app.authRepository
+    val onGoogleClick = {
+        val activity = context as? Activity
+        if (activity == null) {
+            Toast.makeText(context, "No se pudo abrir el acceso con Google", Toast.LENGTH_SHORT).show()
+        } else {
+            scope.launch {
+                try {
+                    val option = GetGoogleIdOption.Builder()
+                        .setFilterByAuthorizedAccounts(false)
+                        .setAutoSelectEnabled(false)
+                        .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                        .build()
+                    val request = GetCredentialRequest.Builder().addCredentialOption(option).build()
+                    val result = CredentialManager.create(context).getCredential(activity, request)
+                    val googleCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
+                    legacyAuth.signInWithGoogle(googleCredential.idToken)
+                        .onSuccess { navController.goHome() }
+                        .onFailure { error ->
+                            Toast.makeText(context, error.message ?: "No se pudo iniciar sesión con Google", Toast.LENGTH_LONG).show()
+                        }
+                } catch (_: NoCredentialException) {
+                    Toast.makeText(context, "No se encontró una cuenta de Google disponible", Toast.LENGTH_LONG).show()
+                } catch (_: GetCredentialException) {
+                    Toast.makeText(context, "No se pudo completar el acceso con Google", Toast.LENGTH_LONG).show()
+                } catch (_: Exception) {
+                    Toast.makeText(context, "No se pudo iniciar sesión con Google", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
     val authFactory = viewModelFactory { initializer { AuthViewModel(auth) } }
     val start = if (auth.isLoggedIn()) MainDestination.DASHBOARD.route else Routes.LOGIN
 
@@ -61,7 +98,7 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
                 viewModel = viewModel(factory = authFactory),
                 onLoggedIn = { navController.goHome() },
                 onGoToRegister = { navController.navigate(Routes.REGISTER) { launchSingleTop = true } },
-                onGoogleClick = googleNotAvailable,
+                onGoogleClick = onGoogleClick,
             )
         }
         composable(Routes.REGISTER) {
@@ -73,7 +110,7 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
                         navController.navigate(Routes.LOGIN) { popUpTo(0) }
                     }
                 },
-                onGoogleClick = googleNotAvailable,
+                onGoogleClick = onGoogleClick,
             )
         }
         composable(MainDestination.DASHBOARD.route) {
