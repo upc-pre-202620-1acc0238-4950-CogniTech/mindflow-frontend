@@ -51,7 +51,7 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
     val scope = rememberCoroutineScope()
     val auth = app.authUseCases
     val legacyAuth = app.authRepository
-    val onGoogleClick = {
+    val onGoogleClick: () -> Unit = {
         val activity = context as? Activity
         if (activity == null) {
             Toast.makeText(context, "No se pudo abrir el acceso con Google", Toast.LENGTH_SHORT).show()
@@ -79,6 +79,7 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
                     Toast.makeText(context, "No se pudo iniciar sesión con Google", Toast.LENGTH_LONG).show()
                 }
             }
+            Unit
         }
     }
     val authFactory = viewModelFactory { initializer { AuthViewModel(auth) } }
