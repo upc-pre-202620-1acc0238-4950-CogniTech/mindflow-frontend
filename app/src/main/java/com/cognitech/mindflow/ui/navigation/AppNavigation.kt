@@ -36,8 +36,8 @@ import com.cognitech.mindflow.ui.plans.PlansScreen
 import com.cognitech.mindflow.ui.plans.PlansViewModel
 import com.cognitech.mindflow.ui.settings.SettingsScreen
 import com.cognitech.mindflow.ui.settings.SettingsViewModel
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import kotlinx.coroutines.launch
 
 object Routes {
@@ -58,10 +58,9 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
         } else {
             scope.launch {
                 try {
-                    val option = GetGoogleIdOption.Builder()
-                        .setFilterByAuthorizedAccounts(false)
-                        .setAutoSelectEnabled(false)
-                        .setServerClientId(BuildConfig.GOOGLE_WEB_CLIENT_ID)
+                    // Flujo del botón oficial: permite escoger una cuenta, incluso si no se había
+                    // autenticado antes en MindFlow.
+                    val option = GetSignInWithGoogleOption.Builder(BuildConfig.GOOGLE_WEB_CLIENT_ID)
                         .build()
                     val request = GetCredentialRequest.Builder().addCredentialOption(option).build()
                     val result = CredentialManager.create(context).getCredential(activity, request)
@@ -72,7 +71,11 @@ fun AppNavigation(app: MindFlowApplication, navController: NavHostController = r
                             Toast.makeText(context, error.message ?: "No se pudo iniciar sesión con Google", Toast.LENGTH_LONG).show()
                         }
                 } catch (_: NoCredentialException) {
-                    Toast.makeText(context, "No se encontró una cuenta de Google disponible", Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        context,
+                        "No se encontró una cuenta de Google. Agrega una en Ajustes del dispositivo y vuelve a intentar.",
+                        Toast.LENGTH_LONG,
+                    ).show()
                 } catch (_: GetCredentialException) {
                     Toast.makeText(context, "No se pudo completar el acceso con Google", Toast.LENGTH_LONG).show()
                 } catch (_: Exception) {
