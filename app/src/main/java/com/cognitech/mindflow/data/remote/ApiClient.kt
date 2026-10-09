@@ -74,6 +74,7 @@ object ApiClient {
     val journalApi: JournalApi by lazy { retrofit.create(JournalApi::class.java) }
     val subscriptionApi: SubscriptionApi by lazy { retrofit.create(SubscriptionApi::class.java) }
     val chatApi: ChatApi by lazy { retrofit.create(ChatApi::class.java) }
+    val aiInsightsApi: AiInsightsApi by lazy { retrofit.create(AiInsightsApi::class.java) }
 
     fun <T> toJsonBody(strategy: SerializationStrategy<T>, value: T): RequestBody =
         json.encodeToString(strategy, value).toRequestBody(jsonMediaType)

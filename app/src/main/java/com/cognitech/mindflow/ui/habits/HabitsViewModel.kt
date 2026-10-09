@@ -13,6 +13,9 @@ import com.cognitech.mindflow.data.model.Sentiment
 import com.cognitech.mindflow.data.repository.AuthRepository
 import com.cognitech.mindflow.data.repository.HabitRepository
 import com.cognitech.mindflow.data.repository.JournalRepository
+import com.cognitech.mindflow.data.remote.ApiClient
+import com.cognitech.mindflow.data.remote.dto.HabitSuggestionsResponse
+import com.cognitech.mindflow.data.remote.dto.StressCheckResponse
 import kotlinx.coroutines.launch
 
 enum class HabitsTab(val label: String) { ROUTINES("Mis Rutinas"), SUGGESTIONS("Sugerencias de IA"), HISTORY("Historial") }
@@ -30,6 +33,10 @@ data class HabitsState(
     val newFrequency: String = HabitFrequencies.first(),
     val filter: String = "",
     val statusFilter: HabitStatusFilter = HabitStatusFilter.ALL,
+    val aiSuggestions: List<HabitSuggestion> = emptyList(),
+    val aiAdvice: String? = null,
+    val suggestionsLoading: Boolean = false,
+    val suggestionsLoaded: Boolean = false,
 ) {
     /** Con estrés alto, la IA pausa las tareas de alta exigencia cognitiva (categoría Estudios). */
     fun isPaused(habit: Habit) = stressDetected && habit.category == HabitCategories.STUDY
@@ -50,10 +57,10 @@ data class HabitsState(
         }
 
     val suggestions
-        get() = SUGGESTIONS.filter { s -> habits.none { it.name.equals(s.name, ignoreCase = true) } }
+        get() = aiSuggestions.filter { s -> habits.none { it.name.equals(s.name, ignoreCase = true) } }
 
     companion object {
-        val SUGGESTIONS = listOf(
+        val FALLBACK_SUGGESTIONS = listOf(
             HabitSuggestion("Caminar 15 minutos al aire libre", HabitCategories.PHYSICAL, "Moverte al aire libre reduce el cortisol y mejora tu ánimo."),
             HabitSuggestion("Escribir 3 cosas por las que estás agradecido", HabitCategories.MENTAL, "La gratitud diaria ayuda a equilibrar los pensamientos negativos."),
             HabitSuggestion("Dormir antes de las 11 PM", HabitCategories.SLEEP, "Un descanso regular mejora tu concentración al día siguiente."),
@@ -84,7 +91,41 @@ class HabitsViewModel(
         }
     }
 
-    fun onTabChange(tab: HabitsTab) { state = state.copy(tab = tab) }
+    fun onTabChange(tab: HabitsTab) {
+        state = state.copy(tab = tab)
+        if (tab == HabitsTab.SUGGESTIONS && !state.suggestionsLoaded && !state.suggestionsLoading) {
+            loadAiInsights()
+        }
+    }
+
+    private fun loadAiInsights() {
+        viewModelScope.launch {
+            state = state.copy(suggestionsLoading = true)
+            val suggestions = runCatching {
+                val response = ApiClient.aiInsightsApi.habitSuggestions()
+                val body = response.body() ?: error("No response")
+                check(response.isSuccessful)
+                ApiClient.parseBody(HabitSuggestionsResponse.serializer(), body).suggestions.map {
+                    HabitSuggestion(it.name, it.category, it.reason)
+                }
+            }.getOrElse { emptyList() }
+
+            val wellness = runCatching {
+                val response = ApiClient.aiInsightsApi.stressCheck()
+                val body = response.body() ?: error("No response")
+                check(response.isSuccessful)
+                ApiClient.parseBody(StressCheckResponse.serializer(), body)
+            }.getOrNull()
+
+            state = state.copy(
+                aiSuggestions = suggestions.ifEmpty { HabitsState.FALLBACK_SUGGESTIONS },
+                aiAdvice = wellness?.advice,
+                stressDetected = wellness?.stressLevel == "high" || state.stressDetected,
+                suggestionsLoading = false,
+                suggestionsLoaded = true,
+            )
+        }
+    }
     fun onNewNameChange(value: String) { state = state.copy(newName = value) }
     fun onNewFrequencyChange(value: String) { state = state.copy(newFrequency = value) }
     fun onFilterChange(value: String) { state = state.copy(filter = value) }

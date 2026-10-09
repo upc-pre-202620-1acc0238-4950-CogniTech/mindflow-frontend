@@ -432,6 +432,12 @@ private fun SuggestionsCard(state: HabitsState, onAdd: (HabitSuggestion) -> Unit
             color = Gray,
             fontSize = 13.6.sp,
         )
+        state.aiAdvice?.let { advice ->
+            Text(advice, color = MineShaft, fontSize = 13.6.sp)
+        }
+        if (state.suggestionsLoading) {
+            Text("Generando recomendaciones personalizadas…", color = Gray, fontSize = 13.6.sp)
+        }
         if (state.suggestions.isEmpty()) {
             Text(stringResource(R.string.habits_suggestions_all_added), color = Gray, fontSize = 13.6.sp)
         }
