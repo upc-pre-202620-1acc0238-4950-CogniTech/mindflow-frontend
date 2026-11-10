@@ -18,7 +18,7 @@ android {
         versionName = "1.0"
 
         // Backend público desplegado en Railway.
-        buildConfigField("String", "API_BASE_URL", "\"https://powerful-wholeness-production.up.railway.app/\"")
+        buildConfigField("String", "API_BASE_URL", "\"https://mindflow-backend-production-898f07da.up.railway.app/\"")
         // Identificador público del cliente OAuth web. El backend usa el mismo valor para validar el ID token.
         buildConfigField("String", "GOOGLE_WEB_CLIENT_ID", "\"1024091868419-vssltjq7qf61s07d2bp89o7g8euh1dfj.apps.googleusercontent.com\"")
     }
